@@ -25,6 +25,9 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 //using request_body_t = boost::beast::http::string_body;
 
 
+
+auto blacklist= std::vector<std::string>{"/database.db","/localhost.pem","/localhost.decrypted.key"};  
+
 std::string check_if_file(const std::string view){
     std::smatch match;
     std::regex r("(.+); boundary=(-+.*)");
@@ -290,6 +293,15 @@ handle_request(
         req.target().find("..") != beast::string_view::npos)
         return send(bad_request("Illegal request-target"));
 
+    for(auto it:blacklist){
+
+if(it==req.target())return send(bad_request("Illegal request-target"));
+
+    }
+
+
+
+
     // Build the path to the requested file
     std::string path = path_cat(doc_root, req.target());
     if(req.target().back() == '/')
@@ -299,7 +311,7 @@ handle_request(
     beast::error_code ec;
     http::file_body::value_type body;
     body.open(path.c_str(), beast::file_mode::scan, ec);
-
+    std::cout<<path<<std::endl;
     // Handle the case where the file doesn't exist
     if(ec == beast::errc::no_such_file_or_directory)
         return send(not_found(req.target()));
