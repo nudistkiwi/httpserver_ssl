@@ -9,7 +9,7 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;   
 
-
+auto blacklist= std::vector<std::string>{"/database.db","/localhost.pem","/localhost.decrypted.key"};  
 
 std::string check_if_file(const std::string view){
     std::smatch match;
@@ -271,6 +271,13 @@ handle_request(
         req.target()[0] != '/' ||
         req.target().find("..") != beast::string_view::npos)
         return send(bad_request("Illegal request-target"));
+
+    for(auto it:blacklist){
+
+if(it==req.target())return send(bad_request("Illegal request-target"));
+
+    }
+
 
     // Build the path to the requested file
     std::string path = path_cat(doc_root, req.target());
