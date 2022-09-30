@@ -234,6 +234,8 @@ handle_request(
         return res;
     };
 
+
+    std::cout << "handle" << std::endl;
 	    // Make sure we can handle the method
     if( req.method() != http::verb::get &&
         req.method() != http::verb::head && req.method() != http::verb::post)
@@ -285,7 +287,7 @@ handle_request(
 
 
   for(auto it:blacklist){
-	if(it==req.target())return send(bad_request("Illegal request-target"))
+      if (it == req.target())return send(bad_request("Illegal request-target"));
     }
 
     // Build the path to the requested file
