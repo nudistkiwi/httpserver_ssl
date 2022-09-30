@@ -182,24 +182,7 @@ handle_request(
     http::request<Body, http::basic_fields<Allocator>>&& req,
     Send&& send,callback function)
 {
-    //char split_char = '&';
-    //std::istringstream split(req.body());
-    //auto head = req.header();
-    //for (auto it = req.begin(); it != req.end();it++) { }
-    //std::cout << std::string(req.base()) << std::endl; // DOES NOT WORK ON LINUX
-    //std::cout << req.get() << std::endl;
-    //try{
-
-   // }
-   // catch(.){}
     
-    //req.get(http::field::content_type);
-    //req.at("content_type");
-    //std::string test = req["content_type"];
-   // now use `tokens`
-    //std::cout<<req.body()<<std::endl;
-   // for(auto it:tokens)
-    // Returns a bad request response
     auto const bad_request =
     [&req](beast::string_view why)
     {
@@ -239,15 +222,11 @@ handle_request(
     };
 
   // Respond to POST request
-    //if(false){
-    if (req.method() == http::verb::post) {// function(req.body()); }
-    //if (false) {
-    //if( req.method() == http::verb::post){
 
-
+    if (req.method() == http::verb::post) {
+ 
         auto test = std::string(req.at(http::field::content_type));
-        // std::cout<<test<<std::endl;
-     //check_if_file(test);
+
         std::string out_path;
         auto cp = check_if_file(test);
         if (cp != "empty") {//std::cout<<check_if_file(test)<<std::endl;
@@ -333,8 +312,6 @@ if(it==req.target())return send(bad_request("Illegal request-target"));
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
     }
-
-
 
     // Respond to GET request
     http::response<http::file_body> res{
