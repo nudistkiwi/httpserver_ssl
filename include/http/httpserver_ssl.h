@@ -183,7 +183,20 @@ handle_request(
     Send&& send,callback function)
 {
     
-    auto const bad_request =
+
+	    auto const ok_response =
+    [&req](beast::string_view why)
+    {
+        http::response<http::string_body> res{http::status::ok, req.version()};
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        //res.set(http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = std::string(why);
+        res.prepare_payload();
+        return res;
+    };    
+	    
+	auto const bad_request =
     [&req](beast::string_view why)
     {
         http::response<http::string_body> res{http::status::bad_request, req.version()};
@@ -221,33 +234,36 @@ handle_request(
         return res;
     };
 
+	    // Make sure we can handle the method
+    if( req.method() != http::verb::get &&
+        req.method() != http::verb::head && req.method() != http::verb::post)
+        return send(bad_request("Unknown HTTP-method"));
+	    
+	    
   // Respond to POST request
 
     if (req.method() == http::verb::post) {
  
         auto test = std::string(req.at(http::field::content_type));
-
         std::string out_path;
         auto cp = check_if_file(test);
         if (cp != "empty") {//std::cout<<check_if_file(test)<<std::endl;
             parse_write_file(req.body());
-            out_path = "test.json";
+            return send(ok_response("Upload completed"));
         }
-
-        else {
+	else {
              out_path = function(req.body());
-        }
-            beast::error_code ecc;
+             }
+            
+	    beast::error_code ecc;
             http::file_body::value_type p_body;
-
-
             p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
-
+	    
             // Handle the case where the file doesn't exist
             if (ecc == beast::errc::no_such_file_or_directory)
                 return send(not_found(req.target()));
-
-            http::response<http::file_body> res{
+            
+	    http::response<http::file_body> res{
                 std::piecewise_construct,
                 std::make_tuple(std::move(p_body)),
                 std::make_tuple(http::status::ok, req.version()) };
@@ -257,14 +273,9 @@ handle_request(
             res.keep_alive(req.keep_alive());
             return send(std::move(res));
 
-
-        
     }
 
-    // Make sure we can handle the method
-    if( req.method() != http::verb::get &&
-        req.method() != http::verb::head)
-        return send(bad_request("Unknown HTTP-method"));
+
 
     // Request path must be absolute and not contain "..".
     if( req.target().empty() ||
@@ -272,19 +283,15 @@ handle_request(
         req.target().find("..") != beast::string_view::npos)
         return send(bad_request("Illegal request-target"));
 
-    for(auto it:blacklist){
 
-if(it==req.target())return send(bad_request("Illegal request-target"));
-
+  for(auto it:blacklist){
+	if(it==req.target())return send(bad_request("Illegal request-target"))
     }
-
-
-
 
     // Build the path to the requested file
     std::string path = path_cat(doc_root, req.target());
     if(req.target().back() == '/')
-        path.append("index.html");
+    path.append("index.html");
 
     // Attempt to open the file
     beast::error_code ec;
@@ -294,14 +301,12 @@ if(it==req.target())return send(bad_request("Illegal request-target"));
     // Handle the case where the file doesn't exist
     if(ec == beast::errc::no_such_file_or_directory)
         return send(not_found(req.target()));
-
     // Handle an unknown error
     if(ec)
         return send(server_error(ec.message()));
-
     // Cache the size since we need it after the move
     auto const size = body.size();
-
+	    
     // Respond to HEAD request
     if(req.method() == http::verb::head)
     {
