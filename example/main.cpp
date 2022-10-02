@@ -24,68 +24,12 @@ std::cout<<"7...ingest clipboard"<<std::endl;
 std::cout<<"8...search for element:"<<std::endl;
 std::cout<<"11...clipboard search:"<<std::endl;
 */
-std::string callback(std::string A){
-    std::string temp="";
-    std::string op="<form action=\"/action_page.php\" method=\"POST\"><label for=\"Option\">Options found:</label><select id=\"option\" name=\"option\"><option value=\"bulk insert\">bulk insert</option><option value=\"import file\">import file</option><option value=\"scan files\">scan files</option><option value=\"expand table\">expand table</option><option value=\"scan csv file\">scan csv file</option><option value=\"ingest clipboard\">ingest clipboard</option><option value=\"clipboard search\">clipboard search</option></select><input type=\"text\" id=\"link\" name=\"link\" value=\"\"><br><input type=\"submit\" value=\"Submit\"></form>";
-    std::string op1="<form action=\"/action_page.php\" method=\"POST\"><label for=\"Option\">Options found:</label><select id=\"option\" name=\"option\">";
-    std::string op2="</select><input type=\"submit\" value=\"Submit\"></form>";
-std::string query="<form action=\"/\" method=\"POST\"><label for=\"fname\">Qeuery String:</label><br><input type=\"text\" id=\"fname\" name=\"fname\" value=\"\"><br><input type=\"submit\" value=\"Submit\"></form>";
-std::string clip="<form action=\"/\" method=\"POST\"><input type=\"submit\" name=\"clip\" value=\"Copy to Clipboard\"></form>";
-    std::string first="<style>.dropbtn {background-color: #4CAF50;color: white;padding: 16px;font-size: 16px;border: none;}.dropdown {position: relative;display: inline-block;}.dropdown-content {display: none;position: absolute;background-color: #f1f1f1;min-width: 160px;box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);z-index: 1;}.dropdown-content a {color: black;padding: 12px 16px;text-decoration: none;display: block;}.dropdown-content a:hover {background-color: #ddd;}.dropdown:hover .dropdown-content {display: block;}.dropdown:hover .dropbtn {background-color: #3e8e41;}</style>";
-   std::string box="<form action=\"/action_page.php\" method=\"POST\"><label for=\"fname\">First name:</label><br><input type=\"text\" id=\"fname\" name=\"fname\" value=\"John\"><br><input type=\"submit\" value=\"Submit\"></form>";
-   std::cout << "HHTP BODY" << std::endl;
-   if(A.size()<1000){
-   std::cout << A << std::endl;
-   }
-    /*
-    for(auto it:A){temp+=it+"&#13";//std::cout<<it<<std::endl;
-    }*/
-   // std::string out="<!DOCTYPE html><html><head>"+first+"<textarea rows=\"30\" cols=\"205\" placeholder=test>"+temp+"</textarea>"+query+op1+option(A)+op2+op+clip+"</body></html>";
-  
-   int k = 1;
-   /*
-       for (auto it : frame)
-       {
-           file.append(it);
-           if (k % cols == 0)
-           {
-               file.append("\n");
-           }
-           else
-           {
-               file.append(";");
-           }
-           k++;
-       }
-   */
+std::string callback(http::request<http::string_body>& A){
+   
+   
 
-   int N;/*
-   const std::string filename = "New Microsoft Excel Worksheet.xlsx";
-   std::ifstream input(filename.c_str(), std::ios::binary);
-   std::ifstream src;
-   std::ofstream dst;
-   src.open("New Microsoft Excel Worksheet.xlsx", std::ios::in | std::ios::binary);
-   input.seekg(0, input.end);
-   N = input.tellg();
-   input.seekg(0, input.beg);
-   N = N - input.tellg();
-   char* data = new char[N];
-   input.read(data, N);
-   std::string help(data, N);
-   delete[] data;
-   */
-  // std::ofstream stream("testo.xlsx", std::ios::binary);
-  // stream <<A;
-  // stream.close();
-   std::string out="test.json";
-   /*
-   dst.open("testo2.xlsx", std::ios::out | std::ios::binary);
-   dst << src.rdbuf();
 
-   src.close();
-   dst.close();
-   */
-    return(out);};
+    return(A.body());};
 
 int main(//int argc, char* argv[]
 )
@@ -103,8 +47,9 @@ int main(//int argc, char* argv[]
     */
 
      //std::function<std::string(std::vector<std::string>)> func=callback;
-          std::function<std::string(std::string)> func=callback;
-   httpserver_ssl(func);
+    std::function<std::string(http::request<http::string_body>&)> func=callback;
+    bundle funcs(func,"8080");
+    httpserver_ssl(funcs);
    /*
     char *ipaddress="127.0.0.1";
     char *ports="9090";

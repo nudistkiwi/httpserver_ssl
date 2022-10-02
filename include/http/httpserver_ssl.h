@@ -26,7 +26,188 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 
 
-auto blacklist= std::vector<std::string>{"/database.db","/localhost.pem","/localhost.decrypted.key"};  
+
+
+class bundle {
+    std::function<std::string(http::request<http::string_body>&, http::response<http::string_body>&)> test;
+    std::function<std::string(http::request<http::string_body>&)> post_func;
+    std::function<std::string(http::request<http::string_body>&)> get_func;
+    std::function<std::string(http::request<http::string_body>&)> auth_func;
+    
+    //std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password=x7bhm3Ma" };
+
+
+public:
+    char* ports = "8080";
+    std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
+    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=ECU" };
+    std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
+    std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/images","/build" };
+    std::vector<std::string> whitelisted_files = std::vector<std::string>{ "/login.html" };
+    std::vector<std::string> blacklist = std::vector<std::string>{ "/database.db","/localhost.pem","/localhost.decrypted.key" };
+    std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
+
+    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_) { post_func = post_func_; };
+    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, char* ports_) { post_func = post_func_; ports = ports_; };
+    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, std::function<std::string(http::request<http::string_body>&)> get_func_) { post_func = post_func_; get_func = get_func_;
+    };
+
+
+    
+    
+    std::string post(http::request<http::string_body>& A) { return(post_func(A)); };
+    std::string get(http::request<http::string_body>& A) { return(get_func(A)); };
+
+    
+
+
+
+
+    void set_test(std::function<std::string(http::request<http::string_body>&, http::response<http::string_body>&)> X) { test = X; };
+    //std::string auth(http::request<http::string_body>& req, http::response<http::string_body>& res) { 
+        //req.at(http::basic_fields::authorize);
+
+    std::string authentication(http::request<http::string_body>& req) {
+        
+
+
+
+
+        if (req.method() == http::verb::get) {
+            std::string tar(req.target());
+
+
+            for (auto it : blacklist) {
+                if (it == tar) return "NOK";
+            }
+
+
+            
+            std::string cookie(req["cookie"]);
+            if (cookie == "") { cookie = std::string(req["authorization"]); }
+
+            for (auto iter : cookies) {
+                std::cout << cookie << " " << iter<< std::endl;
+                if (iter == cookie) return "OK";
+
+            }
+            
+
+            for (auto iter : whitelisted_folders) {
+                std::cout << iter << " " << req.target() << std::endl;
+                if (iter.size() <= tar.size() && tar.substr(0, iter.size()) == iter) return "OK";
+
+            }
+
+            for (auto iter : whitelisted_files) {
+                std::cout << iter << " " << req.target() << std::endl;
+                if (iter == tar) return "OK";
+
+            }
+
+
+
+            return "NOK";
+
+        }
+        if (req.method() == http::verb::post) {
+            
+            for (auto iter : credentials) {
+                std::cout<<iter<<" " << req.body() << std::endl;
+                if (iter == req.body()) { 
+                    
+                req.body() = "/index.html"; 
+                      
+                return "AUTHENTICATED";
+                
+                
+                }
+
+
+
+            }
+
+
+            return "NOK";
+        }
+
+
+
+
+    };
+
+
+};
+
+
+
+
+
+
+
+
+/*
+
+template<class Body, class Allocator> void check_authorisation(http::request<Body, http::basic_fields<Allocator>>& req, http::response<Body, http::basic_fields<Allocator>>& res, beast::string_view doc_root, bundle function) {
+
+    if (req["Cookie"] != "This is first cookie") {
+
+        if (req.method() == http::verb::post) {
+            std::cout << req.body() << std::endl;
+            // res.set(http::field::set_cookie,"This is first cookie");
+            std::cout << "Das ist ein Hit" << std::endl;
+        }
+
+        //return send(no_access(req.target()));
+
+        req.target() = "/";
+
+
+        std::string path = path_cat(doc_root, "/");
+        //if(req.target().back() == '/')
+        path.append("index.html");
+
+        // Attempt to open the file
+        beast::error_code ec;
+        http::file_body::value_type body;
+        body.open(path.c_str(), beast::file_mode::scan, ec);
+        std::cout << path << std::endl;
+        // Handle the case where the file doesn't exist
+        if (ec == beast::errc::no_such_file_or_directory)
+            return send(not_found(req.target()));
+
+        // Handle an unknown error
+        if (ec);
+        // return send(server_error(ec.message()));
+
+     // Cache the size since we need it after the move
+        auto const size = body.size();
+
+
+        res = http::response<http::file_body>{
+            std::piecewise_construct,
+            std::make_tuple(std::move(body)),
+            std::make_tuple(http::status::ok, req.version()) };
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, mime_type(path));
+        res.content_length(size);
+        res.keep_alive(req.keep_alive());
+
+        //return send(std::move(res));
+
+
+     //std::cout<<req.target()<<std::endl;
+     //no_access(req.target());
+    }
+
+
+
+
+};
+*/
+
+
+//auto blacklist= std::vector<std::string>{"/database.db","/localhost.pem","/localhost.decrypted.key"};  
 
 std::string check_if_file(const std::string view){
     std::smatch match;
@@ -175,7 +356,7 @@ fail(beast::error_code ec, char const* what)
 
 template<
     class Body, class Allocator,
-    class Send, typename callback>
+    class Send, class callback>
 void
 handle_request(
     beast::string_view doc_root,
@@ -242,6 +423,45 @@ handle_request(
         return send(bad_request("Unknown HTTP-method"));
 	    
 	    
+
+    auto auth_response = function.authentication(req);
+
+    if (auth_response == "AUTHENTICATED") { 
+        
+        auto out_path = path_cat(doc_root, "/index.html");
+        //  if (req.target().back() == '/')
+          //    path.append("index.html");
+        beast::error_code ecc;
+        http::file_body::value_type p_body;
+        p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
+
+        // Handle the case where the file doesn't exist
+        if (ecc == beast::errc::no_such_file_or_directory)
+            return send(not_found(req.target()));
+
+        http::response<http::file_body> res{
+                std::piecewise_construct,
+                std::make_tuple(std::move(p_body)),
+                std::make_tuple(http::status::ok, req.version()) };
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, mime_type(out_path));
+        res.set(http::field::set_cookie, "vsCmKwbAzXmydPRahVPH");
+        // res.content_length(size);
+        res.keep_alive(req.keep_alive());
+        return send(std::move(res));
+
+        
+
+    }
+    
+    
+    if (auth_response != "OK") { 
+        std::cout << "NOT OK REQUEST" << std::endl;
+        return send(bad_request("Illegal request- not authorized")); }
+
+
+
+
   // Respond to POST request
 
     if (req.method() == http::verb::post) {
@@ -254,9 +474,14 @@ handle_request(
             return send(ok_response("Upload completed"));
         }
 	else {
-             out_path = function(req.body());
+             out_path = function.post(req);
+
+             std::cout << out_path << std::endl;
              }
-            
+        
+         out_path = path_cat(doc_root, out_path);
+      //  if (req.target().back() == '/')
+        //    path.append("index.html");
 	    beast::error_code ecc;
             http::file_body::value_type p_body;
             p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
@@ -286,9 +511,7 @@ handle_request(
         return send(bad_request("Illegal request-target"));
 
 
-  for(auto it:blacklist){
-      if (it == req.target())return send(bad_request("Illegal request-target"));
-    }
+
 
     // Build the path to the requested file
     std::string path = path_cat(doc_root, req.target());
@@ -381,14 +604,14 @@ class session : public std::enable_shared_from_this<session>
     http::request<http::string_body> req_;
     std::shared_ptr<void> res_;
     send_lambda lambda_;
-    std::function<std::string(std::string)> function_;
+    bundle function_;
     boost::optional<http::request_parser<http::string_body>> parser_;
  //   template <typename func>
   //  func function_;    
 
 public:
     // Take ownership of the stream
-    template <typename call>
+    template <class call>
     session(
         tcp::socket&& socket,
         std::shared_ptr<std::string const> const& doc_root,call function 
@@ -518,10 +741,10 @@ class listener : public std::enable_shared_from_this<listener>
     net::io_context& ioc_;
     tcp::acceptor acceptor_;
     std::shared_ptr<std::string const> doc_root_;
-    std::function<std::string(std::string)> function_;
+    bundle function_;
 
 public:
-template <typename call>
+template <class call>
     listener(
         net::io_context& ioc,
         tcp::endpoint endpoint,
@@ -615,13 +838,15 @@ private:
 
 
 //void start_http_server(std::function<std::string(std::vector<std::string> )> func){
- void httpserver_ssl(std::function<std::string(std::string)> func){
+ void httpserver_ssl(bundle& func){
     
      char* ipaddress = "0.0.0.0";
-     char* ports = "8080";
+    // char* ports = "8080";
      char* filelocation = ".";
-     char* threadnum = "1";
+     char* threadnum = "16";
 
+     /*
+    // bundle func(funcs);
      std::vector<std::string> lines;
      std::string line;
      std::ifstream myfile("settings.ini");
@@ -657,14 +882,14 @@ private:
 
 
      }
+     */
+    // else {
 
-     else {
 
-
-         std::cout << "Unable to open file";
+        // std::cout << "Unable to open file";
          
          auto const address = net::ip::make_address(ipaddress);
-         auto const port = static_cast<unsigned short>(std::atoi(ports));
+         auto const port = static_cast<unsigned short>(std::atoi(func.ports));
          auto const doc_root = std::make_shared<std::string>(filelocation);
          auto const threads = std::max<int>(1, std::atoi(threadnum));
 
@@ -683,7 +908,7 @@ private:
              )->run();
          ioc.run();
 
-     }
+  //   }
  //char *ipaddress="127.0.0.1";
 
 
