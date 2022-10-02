@@ -40,7 +40,7 @@ class bundle {
 public:
     char* ports = "8080";
     std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=ECU" };
+    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU" };
     std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
     std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/images","/build" };
     std::vector<std::string> whitelisted_files = std::vector<std::string>{ "/login.html" };
@@ -112,6 +112,16 @@ public:
         }
         if (req.method() == http::verb::post) {
             
+            std::string cookie(req["cookie"]);
+            if (cookie == "") { cookie = std::string(req["authorization"]); }
+
+            for (auto iter : cookies) {
+                std::cout << cookie << " " << iter<< std::endl;
+                if (iter == cookie) return "OK";
+
+            }
+
+
             for (auto iter : credentials) {
                 std::cout<<iter<<" " << req.body() << std::endl;
                 if (iter == req.body()) { 
@@ -488,7 +498,7 @@ handle_request(
 	    
             // Handle the case where the file doesn't exist
             if (ecc == beast::errc::no_such_file_or_directory)
-                return send(not_found(req.target()));
+                return send(not_found(out_path));
             
 	    http::response<http::file_body> res{
                 std::piecewise_construct,
