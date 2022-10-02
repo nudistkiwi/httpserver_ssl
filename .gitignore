@@ -4983,3 +4983,11 @@ build/x64/Release/ZERO_CHECK/ZERO_CHECK.tlog/ZERO_CHECK.lastbuildstate
 build/ZERO_CHECK.vcxproj
 build/ZERO_CHECK.vcxproj.filters
 build/Release/vendors/Flot/excanvas.min.js
+build/.vs/httpserver_ssl/config/applicationhost.config
+build/ALL_BUILD.vcxproj.user
+build/Release/vendors/Flot/excanvas.min.js
+build/test.dir/Release/test.Build.CppClean.log
+build/test.dir/Release/test.vcxproj.FileListAbsolute.txt
+build/test.vcxproj.user
+build/x64/Release/ZERO_CHECK/ZERO_CHECK.Build.CppClean.log
+build/x64/Release/ZERO_CHECK/ZERO_CHECK.vcxproj.FileListAbsolute.txt
