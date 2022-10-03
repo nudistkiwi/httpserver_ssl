@@ -16,12 +16,15 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
+#include <json.hpp>
+
 
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+using json = nlohmann::json;
 //using request_body_t = boost::beast::http::string_body;
 
 
@@ -83,7 +86,7 @@ public:
 
 
             
-            std::string cookie(req["cookie"]);
+            std::string cookie(req["cookie2"]);
             if (cookie == "") { cookie = std::string(req["authorization"]); }
 
             for (auto iter : cookies) {
@@ -112,7 +115,7 @@ public:
         }
         if (req.method() == http::verb::post) {
             
-            std::string cookie(req["cookie"]);
+            std::string cookie(req["cookie2"]);
             if (cookie == "") { cookie = std::string(req["authorization"]); }
 
             for (auto iter : cookies) {
@@ -136,6 +139,16 @@ public:
 
 
             }
+
+        
+        if(json::accept(req.body())){
+        json j = json::parse(req.body());
+        std::string pswd;
+        if(j.contains("token")){pswd=j["token"];}
+        if(j.contains("password")){pswd=j["password"];}
+
+        };
+
 
 
             return "NOK";
@@ -433,7 +446,6 @@ handle_request(
         return send(bad_request("Unknown HTTP-method"));
 	    
 	    
-
     auto auth_response = function.authentication(req);
 
     if (auth_response == "AUTHENTICATED") { 
@@ -455,7 +467,7 @@ handle_request(
                 std::make_tuple(http::status::ok, req.version()) };
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, mime_type(out_path));
-        res.set(http::field::set_cookie, "vsCmKwbAzXmydPRahVPH");
+        res.set(http::field::set_cookie2, "vsCmKwbAzXmydPRahVPH");
         // res.content_length(size);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));

@@ -40,6 +40,7 @@ if(USE_SSL)
 find_package(OpenSSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)
+target_include_directories(httpserver_ssl PUBLIC include)
 target_link_libraries (httpserver_ssl
         OpenSSL::SSL OpenSSL::Crypto
    #     BOOST
@@ -53,6 +54,7 @@ else()
  add_library(httpserver_ssl INTERFACE)
  target_include_directories(httpserver_ssl INTERFACE include/http)
  #target_include_directories(test INTERFACE include/http)
+ target_include_directories(httpserver_ssl INTERFACE include)
 
 endif(USE_SSL)
 unset(USE_SSL) # <---- this is the important!!
