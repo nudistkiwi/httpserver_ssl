@@ -43,8 +43,10 @@ class bundle {
 public:
     char* ports = "8080";
     std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU" };
+    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
     std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
+    std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
+
     std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/images","/build" };
     std::vector<std::string> whitelisted_files = std::vector<std::string>{ "/login.html" };
     std::vector<std::string> blacklist = std::vector<std::string>{ "/database.db","/localhost.pem","/localhost.decrypted.key" };
@@ -85,8 +87,17 @@ public:
             }
 
 
+            for (auto iter : tickets) {
+                std::cout << tar << " " << iter<< std::endl;
+                if (iter == tar) {  tickets.pop_back();
+                std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
+                 return "VALID TICKET";}
+
+            }
+
+
             
-            std::string cookie(req["cookie2"]);
+            std::string cookie(req["cookie"]);
             if (cookie == "") { cookie = std::string(req["authorization"]); }
 
             for (auto iter : cookies) {
@@ -115,7 +126,7 @@ public:
         }
         if (req.method() == http::verb::post) {
             
-            std::string cookie(req["cookie2"]);
+            std::string cookie(req["cookie"]);
             if (cookie == "") { cookie = std::string(req["authorization"]); }
 
             for (auto iter : cookies) {
@@ -448,7 +459,7 @@ handle_request(
 	    
     auto auth_response = function.authentication(req);
 
-    if (auth_response == "AUTHENTICATED") { 
+    if (auth_response == "AUTHENTICATED" || auth_response=="VALID TICKET") { 
         
         auto out_path = path_cat(doc_root, "/index.html");
         //  if (req.target().back() == '/')
@@ -467,7 +478,7 @@ handle_request(
                 std::make_tuple(http::status::ok, req.version()) };
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, mime_type(out_path));
-        res.set(http::field::set_cookie2, "vsCmKwbAzXmydPRahVPH");
+        res.set(http::field::set_cookie, "vsCmKwbAzXmydPRahVPH");
         // res.content_length(size);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
