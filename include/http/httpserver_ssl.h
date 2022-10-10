@@ -75,7 +75,7 @@ public:
     std::string authentication(http::request<http::string_body>& req) {
         
 
-
+     //   return "OK";
 
 
         if (req.method() == http::verb::get) {
@@ -102,7 +102,8 @@ public:
 
             for (auto iter : cookies) {
                 std::cout << cookie << " " << iter<< std::endl;
-                if (iter == cookie) return "OK";
+                //if (iter == cookie) return "OK";
+                if (cookie.find(iter)!=std::string::npos) return "OK";
 
             }
             
@@ -131,7 +132,8 @@ public:
 
             for (auto iter : cookies) {
                 std::cout << cookie << " " << iter<< std::endl;
-                if (iter == cookie) return "OK";
+               // if (iter == cookie) return "OK";
+                if (cookie.find(iter)!=std::string::npos) return "OK";
 
             }
 
