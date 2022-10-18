@@ -32,17 +32,17 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif (WIN32)
 
-
+add_subdirectory(library)
 add_executable(test example/main.cpp)
 
-option(USE_SSL "Use no TLS" ON) #OFF by default
+option(USE_SSL "Use no TLS" OFF) #OFF by default
 if(USE_SSL)
 find_package(OpenSSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)
 target_include_directories(httpserver_ssl PUBLIC include)
 target_link_libraries (httpserver_ssl
-        OpenSSL::SSL OpenSSL::Crypto
+        OpenSSL::SSL OpenSSL::Crypto dataframe
    #     BOOST
       #  lib-asio
        # lib-asio-ssl
@@ -52,7 +52,9 @@ target_link_libraries (httpserver_ssl
  #target_include_directories(test Public include/ssl)
 else()
  add_library(httpserver_ssl INTERFACE)
+ target_link_libraries (httpserver_ssl INTERFACE dataframe)
  target_include_directories(httpserver_ssl INTERFACE include/http)
+ #target_include_directories(httpserver_ssl PUBLIC library/dataframe/include)
  #target_include_directories(test INTERFACE include/http)
  target_include_directories(httpserver_ssl INTERFACE include)
 

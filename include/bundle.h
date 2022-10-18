@@ -19,7 +19,7 @@
 #include <fstream>
 #include <regex>
 #include <json.hpp>
-
+#include <dataframe.h>
 
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -83,13 +83,11 @@ public:
             }
 
 
-            for (auto iter : tickets) {
-                std::cout << tar << " " << iter<< std::endl;
-                if (iter == tar) {  tickets.pop_back();
-                std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
-                 return "VALID TICKET";}
+           // for (auto iter : tickets) {
+             //   std::cout << tar << " " << iter<< std::endl;
+                      
 
-            }
+          //  }
 
 
             
@@ -115,6 +113,28 @@ public:
                 if (iter == tar) return "OK";
 
             }
+
+
+
+                        sqlite3 *DB;
+                        sqlite3_stmt *stmt = 0;
+                        dataframe Ax;
+                        dataframe Bx;
+               auto exit = sqlite3_open("server.db", &DB);
+               Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
+               Bx.print();
+               
+            Ax.search_sqlite(DB,stmt,"SELECT value FROM tickets WHERE value='"+tar+"';");
+            std::cout<<"SELECT value FROM tickets WHERE value='"+tar+"';"<<std::endl;
+               
+                if (Ax.rows>0) {  //tickets.pop_back();
+               Ax.print();   
+                        //Ax.search_sqlite(DB,)
+
+                         Ax.statement(DB,"DELETE FROM tickets WHERE value='"+tar+"';"); 
+
+                std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
+                 return "VALID TICKET";}
 
 
 
