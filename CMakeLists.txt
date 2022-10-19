@@ -35,7 +35,7 @@ endif (WIN32)
 add_subdirectory(library)
 add_executable(test example/main.cpp)
 
-option(USE_SSL "Use no TLS" OFF) #OFF by default
+option(USE_SSL "Use no TLS" ON) #OFF by default
 if(USE_SSL)
 find_package(OpenSSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)

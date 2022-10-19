@@ -6,6 +6,7 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
+#include <boost/functional/hash.hpp>
 //#include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -19,6 +20,9 @@
 #include <fstream>
 #include <regex>
 #include <json.hpp>
+#include <ctime>
+#include <time.h>
+
 #include <dataframe.h>
 
 
@@ -30,7 +34,17 @@ using json = nlohmann::json;
 //using request_body_t = boost::beast::http::string_body;
 
 
+static const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
 
+    return buf;
+}
 
 class bundle {
     std::function<std::string(http::request<http::string_body>&, http::response<http::string_body>&)> test;
@@ -42,6 +56,8 @@ class bundle {
 
 
 public:
+
+   
     char* ports = "8080";
     std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
     std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
@@ -57,8 +73,15 @@ public:
     bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, char* ports_) { post_func = post_func_; ports = ports_; };
     bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, std::function<std::string(http::request<http::string_body>&)> get_func_) { post_func = post_func_; get_func = get_func_;
     };
-	
-	
+	/*
+	 void hash(){for(auto& iter:cookies){
+         auto date=currentDateTime();
+        date=date.substr(0,12);
+        //iter=date+iter;
+        
+        std::to_string(boost::hash_value(date+iter));
+        }};
+        */
 	std::string post(http::request<http::string_body>& A) { return(post_func(A)); };
     std::string get(http::request<http::string_body>& A) { return(get_func(A)); };
 	
@@ -70,8 +93,26 @@ public:
 
     std::string authentication(http::request<http::string_body>& req) {
         
+    auto date=currentDateTime();
+    /*
+    std::for_each(cookies.begin(),cookies.end(),
+    //[](std::string& Ad){A=std::to_string(std::hash(Ad));}
+    [date](std::string& Ad){
+        auto hj=std::hash(Ad);
+        Ad="sdffsd";}
+    );    
+*/
 
-     //   return "OK";
+
+    for(auto& iter:cookies){
+        
+        date=date.substr(0,13);
+        std::cout<<date<<std::endl;
+        //iter=date+iter;
+        
+        iter=std::to_string(boost::hash_value(date+iter));
+        }
+     //   return "OK";currentDateTime()+
 
 
         if (req.method() == http::verb::get) {
@@ -423,7 +464,8 @@ handle_request(
                 std::make_tuple(http::status::ok, req.version()) };
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, mime_type(out_path));
-        res.set(http::field::set_cookie, "vsCmKwbAzXmydPRahVPH");
+        //function.hash();
+        res.set(http::field::set_cookie, function.cookies[0]);
         // res.content_length(size);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
