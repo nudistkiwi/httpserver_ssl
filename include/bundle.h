@@ -23,7 +23,58 @@
 #include <ctime>
 #include <time.h>
 
-#include <dataframe.h>
+#include <sqlframe.h>
+
+class dataframe: public sqlframe {
+public:
+
+    dataframe(std::string &input):baseframe(input){};
+    dataframe(char *inputs):baseframe(inputs){};
+    dataframe(const std::vector<std::string> A, int B):baseframe(A,B){};
+    dataframe():baseframe(){};
+    dataframe(int i,int j):baseframe(i,j){};
+    dataframe(sqlite3 *DB, sqlite3_stmt *stmt):sqlframe(DB,stmt){};
+    dataframe(baseframe rhs){
+//dataframe temp;
+frame=rhs.frame;
+cols=rhs.cols;
+rows=rhs.rows;
+//return(temp);
+
+    };
+//using baseframe::operator=;
+
+
+
+
+/*
+    dataframe  operator=(const dataframe& rhs)
+{
+
+dataframe temp;
+temp.frame=rhs.frame;
+temp.cols=rhs.cols;
+temp.rows=rhs.rows;
+return(temp);
+
+}
+*/
+    dataframe  operator=(const baseframe& rhs)
+{
+
+dataframe temp;
+temp.frame=rhs.frame;
+temp.cols=rhs.cols;
+temp.rows=rhs.rows;
+return(temp);
+
+}
+
+//dataframe():sqlframe(){};
+
+private:
+
+};
 
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
