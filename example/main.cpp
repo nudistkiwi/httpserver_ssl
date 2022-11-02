@@ -46,6 +46,17 @@ int main(//int argc, char* argv[]
     }
     */
 
+    sqlite3 *DB;
+    sqlite3_stmt *stmt = 0;
+   auto exit = sqlite3_open("server.db", &DB);
+    sqlframe A(0,1);
+    A.insert("value");
+    A.insert("/bettercallsaul123");
+    A.insert("/bettercallsaul1234");
+    A.insert("/bettercallsaul12345");
+    A.insert("/bettercallsaul123456");
+    A.write_sqlite(DB,stmt,"tickets");
+    //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
     std::function<std::string(http::request<http::string_body>&)> func=callback;
     bundle funcs(func,"8080");

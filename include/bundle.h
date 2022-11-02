@@ -210,10 +210,11 @@ public:
 
                         sqlite3 *DB;
                         sqlite3_stmt *stmt = 0;
-                        dataframe Ax;
-                        dataframe Bx;
+                        sqlframe Ax;
+                        sqlframe Bx;
                auto exit = sqlite3_open("server.db", &DB);
                Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
+               
                Bx.print();
                
             Ax.search_sqlite(DB,stmt,"SELECT value FROM tickets WHERE value='"+tar+"';");
@@ -225,9 +226,12 @@ public:
 
                          Ax.statement(DB,"DELETE FROM tickets WHERE value='"+tar+"';"); 
 
-                std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
+                //std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
                  return "VALID TICKET";}
+                else{
+              
 
+                }
 
 
             return "NOK";
