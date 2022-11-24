@@ -42,7 +42,7 @@ add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)
 target_include_directories(httpserver_ssl PUBLIC include)
 target_link_libraries (httpserver_ssl
-        OpenSSL::SSL OpenSSL::Crypto sqlframe baseframe
+        OpenSSL::SSL OpenSSL::Crypto sqlframe jsonframe baseframe
    #     BOOST
       #  lib-asio
        # lib-asio-ssl
@@ -52,7 +52,7 @@ target_link_libraries (httpserver_ssl
  #target_include_directories(test Public include/ssl)
 else()
  add_library(httpserver_ssl INTERFACE)
- target_link_libraries (httpserver_ssl INTERFACE sqlframe baseframe)
+ target_link_libraries (httpserver_ssl INTERFACE sqlframe jsonframe baseframe)
  target_include_directories(httpserver_ssl INTERFACE include/http)
  #target_include_directories(httpserver_ssl INTERFACE library/dataframe/include/sqlframe)
  #target_include_directories(test INTERFACE include/http)

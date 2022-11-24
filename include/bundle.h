@@ -19,62 +19,43 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
-#include <json.hpp>
+//#include <json.hpp>
 #include <ctime>
 #include <time.h>
 
 #include <sqlframe.h>
-
-class dataframe: public sqlframe {
-public:
-
-    dataframe(std::string &input):baseframe(input){};
-    dataframe(char *inputs):baseframe(inputs){};
-    dataframe(const std::vector<std::string> A, int B):baseframe(A,B){};
-    dataframe():baseframe(){};
-    dataframe(int i,int j):baseframe(i,j){};
-    dataframe(sqlite3 *DB, sqlite3_stmt *stmt):sqlframe(DB,stmt){};
-    dataframe(baseframe rhs){
-//dataframe temp;
-frame=rhs.frame;
-cols=rhs.cols;
-rows=rhs.rows;
-//return(temp);
-
-    };
-//using baseframe::operator=;
+#include <jsonframe.h>
 
 
-
-
-/*
-    dataframe  operator=(const dataframe& rhs)
+bool sqlite_check(sqlite3 *DB,sqlite3_stmt *stmt,std::string tablename,std::vector<std::string> cols,std::vector<std::string> val)
 {
 
-dataframe temp;
-temp.frame=rhs.frame;
-temp.cols=rhs.cols;
-temp.rows=rhs.rows;
-return(temp);
+std::cout<<"INTRO"<<std::endl;
+if(cols.size()>0 && cols.size()==val.size()){
+std::string query="SELECT ";
+for(auto& it:cols){query=query+"\""+it+"\""+",";}
+query.pop_back();
+query=query+" FROM \""+tablename+"\" WHERE ";
+std::string sub_str;
+for(int i=0;i<cols.size();i++){
+    sub_str=" \""+cols[i]+"\"='"+val[i]+"' AND";
+    query=query+sub_str;
 
+    }
+query.pop_back();
+query.pop_back();
+query.back()=';';
+sqlframe Ax;
+std::cout<<query<<std::endl;
+Ax.search_sqlite(DB,stmt,query);
+
+if(Ax.rows>0){return(true);}
 }
-*/
-    dataframe  operator=(const baseframe& rhs)
-{
 
-dataframe temp;
-temp.frame=rhs.frame;
-temp.cols=rhs.cols;
-temp.rows=rhs.rows;
-return(temp);
-
+return(false);
 }
 
-//dataframe():sqlframe(){};
 
-private:
-
-};
 
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -111,14 +92,15 @@ public:
    
     char* ports = "8080";
     std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
-    std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
+    //std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
+    //std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
+    //std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
 
-    std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/images","/build" };
-    std::vector<std::string> whitelisted_files = std::vector<std::string>{ "/login.html" };
+    std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/build" };
+    //std::vector<std::string> whitelisted_files = std::vector<std::string>{"/static/css/main.41c4c83c.css", 
+     //   "/static/js/main.4b7a5d5f.js","/","/#/login","/login.html","/index.html","/static/js/9034.592b1093.chunk.js" };
     std::vector<std::string> blacklist = std::vector<std::string>{ "/database.db","/localhost.pem","/localhost.decrypted.key" };
-    std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
+    //std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
 
     bundle(std::function<std::string(http::request<http::string_body>&)> post_func_) { post_func = post_func_; };
     bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, char* ports_) { post_func = post_func_; ports = ports_; };
@@ -167,8 +149,21 @@ public:
 
 
         if (req.method() == http::verb::get) {
-            std::string tar(req.target());
 
+
+            std::string tar(req.target());
+            if(true){
+                        sqlite3 *DB;
+                        sqlite3_stmt *stmt = 0;
+                        sqlframe Ax(0,1);
+                        sqlframe Bx;
+               auto exit = sqlite3_open("server.db", &DB);
+                Ax.insert("file");
+                Ax.insert(tar);
+                Ax.write_sqlite(DB,stmt,"files",std::vector<int>{1});
+
+            }
+            
 
             for (auto it : blacklist) {
                 if (it == tar) return "NOK";
@@ -200,22 +195,33 @@ public:
 
             }
 
-            for (auto iter : whitelisted_files) {
-                std::cout << iter << " " << req.target() << std::endl;
-                if (iter == tar) return "OK";
 
-            }
+                if(true){
+         //   for (auto iter : whitelisted_files) {
+          //      std::cout << iter << " " << req.target() << std::endl;
+                //if (iter == tar) return "OK";
+                            sqlite3 *DB2;
+                        sqlite3_stmt *stmt2 = 0;
+                        sqlframe Ax;
+                        sqlframe Bx;
+               auto exit = sqlite3_open("server.db", &DB2);
+                if(sqlite_check(DB2,stmt2,"whitelisted",std::vector<std::string>{"file"},std::vector<std::string>{tar})){return "OK";}
+                }
 
 
+            
 
+
+                
                         sqlite3 *DB;
                         sqlite3_stmt *stmt = 0;
                         sqlframe Ax;
                         sqlframe Bx;
                auto exit = sqlite3_open("server.db", &DB);
-               Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
+            /*
+            Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
                
-               Bx.print();
+            Bx.print();
                
             Ax.search_sqlite(DB,stmt,"SELECT value FROM tickets WHERE value='"+tar+"';");
             std::cout<<"SELECT value FROM tickets WHERE value='"+tar+"';"<<std::endl;
@@ -223,8 +229,9 @@ public:
                 if (Ax.rows>0) {  //tickets.pop_back();
                Ax.print();   
                         //Ax.search_sqlite(DB,)
-
-                         Ax.statement(DB,"DELETE FROM tickets WHERE value='"+tar+"';"); 
+                   */
+                if(sqlite_check(DB,stmt,"tickets",std::vector<std::string>{"value"},std::vector<std::string>{tar}))      
+                {Ax.statement(DB,"DELETE FROM tickets WHERE value='"+tar+"';"); 
 
                 //std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
                  return "VALID TICKET";}
@@ -249,7 +256,7 @@ public:
 
             }
 
-
+/*
             for (auto iter : credentials) {
                 std::cout<<iter<<" " << req.body() << std::endl;
                 if (iter == req.body()) { 
@@ -265,13 +272,35 @@ public:
 
             }
 
-        
+        */
         if(json::accept(req.body())){
+        std::cout<<"SELECT username FRO"<<std::endl;
+
+
         json j = json::parse(req.body());
         std::string pswd;
+        std::string usr;
         if(j.contains("token")){pswd=j["token"];}
         if(j.contains("password")){pswd=j["password"];}
+        if(j.contains("username")){usr=j["username"];}
+        sqlite3 *DB;
+        sqlite3_stmt *stmt = 0;
+        sqlframe Ax;
+        sqlframe Bx;
+               auto exit = sqlite3_open("server.db", &DB);
+              // Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");      
+              // Bx.print();
+            std::cout<<"SELECT username FROM users WHERE user='"+usr+"' AND password='"+pswd+"';"<<std::endl;
+            
+            Ax.search_sqlite(DB,stmt,"SELECT username FROM users WHERE username='"+usr+"' AND password='"+pswd+"';");
+            Ax.print();
+               
+                if (Ax.rows>0) {  //tickets.pop_back();
+               Ax.print();   
 
+                 return "VALID TICKET";
+
+                }
         };
 
 
@@ -501,31 +530,36 @@ handle_request(
     auto auth_response = function.authentication(req);
 
     if (auth_response == "AUTHENTICATED" || auth_response=="VALID TICKET") { 
-        
-        auto out_path = path_cat(doc_root, "/index.html");
-        //  if (req.target().back() == '/')
-          //    path.append("index.html");
-        beast::error_code ecc;
-        http::file_body::value_type p_body;
-        p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
-
-        // Handle the case where the file doesn't exist
-        if (ecc == beast::errc::no_such_file_or_directory)
-            return send(not_found(req.target()));
-
-        http::response<http::file_body> res{
-                std::piecewise_construct,
-                std::make_tuple(std::move(p_body)),
-                std::make_tuple(http::status::ok, req.version()) };
+    std::cout << auth_response << std::endl;
+ 
+    std::cout << "DONE" << std::endl;
+    /* REDIRECT POST
+       http::response<http::empty_body> res{http::status::found, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, mime_type(out_path));
-        //function.hash();
-        res.set(http::field::set_cookie, function.cookies[0]);
-        // res.content_length(size);
+        res.set(http::field::location, "/index.html");
+        res.set(http::field::set_cookie,function.cookies[0]);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
+      */  
+     jsonframe msg;
+    msg.insert(std::vector<std::string>{"token",function.cookies[0]});
+    msg.insert(std::vector<std::string>{"redirect","index.html"});
+   
 
-        
+     std::string out_path="gasp.json";
+     //http::file_body::value_type p_body=
+     
+     	    http::response<http::string_body> res{
+                
+                //std::make_tuple(std::move(p_body)),
+                http::status::ok, req.version() };
+            res.body()=msg.to_json().dump();
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, mime_type(out_path));
+            res.set(http::field::set_cookie, function.cookies[0]);
+            // res.content_length(size);
+            res.keep_alive(req.keep_alive());
+            return send(std::move(res));
 
     }
     

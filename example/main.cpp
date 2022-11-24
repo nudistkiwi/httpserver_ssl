@@ -29,7 +29,7 @@ std::string callback(http::request<http::string_body>& A){
    
 
 
-    return(A.body());};
+    return("/index.html");};
 
 int main(//int argc, char* argv[]
 )
@@ -56,6 +56,15 @@ int main(//int argc, char* argv[]
     A.insert("/bettercallsaul12345");
     A.insert("/bettercallsaul123456");
     A.write_sqlite(DB,stmt,"tickets");
+
+    sqlframe B(0,2);
+    B.insert("username");
+    B.insert("password");
+    B.insert("duslxx");
+    B.insert("x7bhm3Ma");
+
+    B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
+
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
     std::function<std::string(http::request<http::string_body>&)> func=callback;
