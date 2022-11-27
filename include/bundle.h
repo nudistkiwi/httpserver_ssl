@@ -27,49 +27,54 @@
 #include <jsonframe.h>
 
 
-bool sqlite_check(sqlite3 *DB,sqlite3_stmt *stmt,std::string tablename,std::vector<std::string> cols,std::vector<std::string> val)
+
+bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename, std::vector<std::string> cols, std::vector<std::string> val)
 {
 
-std::cout<<"INTRO"<<std::endl;
-if(cols.size()>0 && cols.size()==val.size()){
-std::string query="SELECT ";
-for(auto& it:cols){query=query+"\""+it+"\""+",";}
-query.pop_back();
-query=query+" FROM \""+tablename+"\" WHERE ";
-std::string sub_str;
-for(int i=0;i<cols.size();i++){
-    sub_str=" \""+cols[i]+"\"='"+val[i]+"' AND";
-    query=query+sub_str;
+    std::cout << "INTRO" << std::endl;
+    if (cols.size() > 0 && cols.size() == val.size())
+    {
+        std::string query = "SELECT ";
+        for (auto &it : cols)
+        {
+            query = query + "\"" + it + "\"" + ",";
+        }
+        query.pop_back();
+        query = query + " FROM \"" + tablename + "\" WHERE ";
+        std::string sub_str;
+        for (int i = 0; i < cols.size(); i++)
+        {
+            sub_str = " \"" + cols[i] + "\"='" + val[i] + "' AND";
+            query = query + sub_str;
+        }
+        query.pop_back();
+        query.pop_back();
+        query.back() = ';';
+        sqlframe Ax;
+        std::cout << query << std::endl;
+        Ax.search_sqlite(DB, stmt, query);
 
+        if (Ax.rows > 0)
+        {
+            return (true);
+        }
     }
-query.pop_back();
-query.pop_back();
-query.back()=';';
-sqlframe Ax;
-std::cout<<query<<std::endl;
-Ax.search_sqlite(DB,stmt,query);
 
-if(Ax.rows>0){return(true);}
+    return (false);
 }
 
-return(false);
-}
-
-
-
-
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+namespace beast = boost::beast;   // from <boost/beast.hpp>
+namespace http = beast::http;     // from <boost/beast/http.hpp>
+namespace net = boost::asio;      // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 using json = nlohmann::json;
-//using request_body_t = boost::beast::http::string_body;
+// using request_body_t = boost::beast::http::string_body;
 
-
-static const std::string currentDateTime() {
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
+static const std::string currentDateTime()
+{
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
     tstruct = *localtime(&now);
     // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
     // for more information about date/time format
@@ -78,316 +83,319 @@ static const std::string currentDateTime() {
     return buf;
 }
 
-class bundle {
-    std::function<std::string(http::request<http::string_body>&, http::response<http::string_body>&)> test;
-    std::function<std::string(http::request<http::string_body>&)> post_func;
-    std::function<std::string(http::request<http::string_body>&)> get_func;
-    std::function<std::string(http::request<http::string_body>&)> auth_func;
-    
-    //std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password=x7bhm3Ma" };
+class bundle
+{
+    std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> test;
+    std::function<std::string(http::request<http::string_body> &)> post_func;
+    std::function<std::string(http::request<http::string_body> &)> get_func;
+    std::function<std::string(http::request<http::string_body> &)> auth_func;
 
+    // std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password=x7bhm3Ma" };
 
 public:
+    char *ports = "8080";
+    std::vector<std::string> cookies = std::vector<std::string>{"FcY6roNeX1nYZiwjJoN3", "vsCmKwbAzXmydPRahVPH", "Wff7ok2VxIfy4Y8QHiPp", "3nMTIevLkOi7lahVSISR", "wFflv26AVYpI3BPkdwk7"};
+    // std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
+    // std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
+    // std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
 
-   
-    char* ports = "8080";
-    std::vector<std::string> cookies = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    //std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
-    //std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
-    //std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
+    std::vector<std::string> whitelisted_folders = std::vector<std::string>{"/vendors", "/build"};
+    // std::vector<std::string> whitelisted_files = std::vector<std::string>{"/static/css/main.41c4c83c.css",
+    //    "/static/js/main.4b7a5d5f.js","/","/#/login","/login.html","/index.html","/static/js/9034.592b1093.chunk.js" };
+    std::vector<std::string> blacklist = std::vector<std::string>{"/database.db", "/localhost.pem", "/localhost.decrypted.key"};
+    // std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
 
-    std::vector<std::string> whitelisted_folders= std::vector<std::string>{ "/vendors","/build" };
-    //std::vector<std::string> whitelisted_files = std::vector<std::string>{"/static/css/main.41c4c83c.css", 
-     //   "/static/js/main.4b7a5d5f.js","/","/#/login","/login.html","/index.html","/static/js/9034.592b1093.chunk.js" };
-    std::vector<std::string> blacklist = std::vector<std::string>{ "/database.db","/localhost.pem","/localhost.decrypted.key" };
-    //std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
-
-    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_) { post_func = post_func_; };
-    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, char* ports_) { post_func = post_func_; ports = ports_; };
-    bundle(std::function<std::string(http::request<http::string_body>&)> post_func_, std::function<std::string(http::request<http::string_body>&)> get_func_) { post_func = post_func_; get_func = get_func_;
+    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_) { post_func = post_func_; };
+    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, char *ports_)
+    {
+        post_func = post_func_;
+        ports = ports_;
     };
-	/*
-	 void hash(){for(auto& iter:cookies){
+    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, std::function<std::string(http::request<http::string_body> &)> get_func_)
+    {
+        post_func = post_func_;
+        get_func = get_func_;
+    };
+    /*
+     void hash(){for(auto& iter:cookies){
          auto date=currentDateTime();
         date=date.substr(0,12);
         //iter=date+iter;
-        
+
         std::to_string(boost::hash_value(date+iter));
         }};
         */
-	std::string post(http::request<http::string_body>& A) { return(post_func(A)); };
-    std::string get(http::request<http::string_body>& A) { return(get_func(A)); };
-	
-	
-	
-    void set_test(std::function<std::string(http::request<http::string_body>&, http::response<http::string_body>&)> X) { test = X; };
-    //std::string auth(http::request<http::string_body>& req, http::response<http::string_body>& res) { 
-        //req.at(http::basic_fields::authorize);
+    std::string post(http::request<http::string_body> &A) { return (post_func(A)); };
+    std::string get(http::request<http::string_body> &A) { return (get_func(A)); };
 
-    std::string authentication(http::request<http::string_body>& req) {
-        
-    auto date=currentDateTime();
-    /*
-    std::for_each(cookies.begin(),cookies.end(),
-    //[](std::string& Ad){A=std::to_string(std::hash(Ad));}
-    [date](std::string& Ad){
-        auto hj=std::hash(Ad);
-        Ad="sdffsd";}
-    );    
-*/
+    void set_test(std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> X) { test = X; };
+    // std::string auth(http::request<http::string_body>& req, http::response<http::string_body>& res) {
+    // req.at(http::basic_fields::authorize);
+
+    std::string authentication(http::request<http::string_body> &req)
+    {
 
 
-    for(auto& iter:cookies){
-        
-        date=date.substr(0,13);
-        std::cout<<date<<std::endl;
-        //iter=date+iter;
-        
-        iter=std::to_string(boost::hash_value(date+iter));
+
+        auto date = currentDateTime();
+        /*
+        std::for_each(cookies.begin(),cookies.end(),
+        //[](std::string& Ad){A=std::to_string(std::hash(Ad));}
+        [date](std::string& Ad){
+            auto hj=std::hash(Ad);
+            Ad="sdffsd";}
+        );
+    */
+
+        for (auto &iter : cookies)
+        {
+
+            date = date.substr(0, 13);
+            std::cout << date << std::endl;
+            // iter=date+iter;
+
+            iter = std::to_string(boost::hash_value(date + iter));
         }
-     //   return "OK";currentDateTime()+
+        //   return "OK";currentDateTime()+
 
-
-        if (req.method() == http::verb::get) {
-
+        if (req.method() == http::verb::get)
+        {
 
             std::string tar(req.target());
-            if(true){
-                        sqlite3 *DB;
-                        sqlite3_stmt *stmt = 0;
-                        sqlframe Ax(0,1);
-                        sqlframe Bx;
-               auto exit = sqlite3_open("server.db", &DB);
+            if (true)
+            {
+                sqlite3 *DB;
+                sqlite3_stmt *stmt = 0;
+                sqlframe Ax(0, 1);
+                sqlframe Bx;
+                auto exit = sqlite3_open("server.db", &DB);
                 Ax.insert("file");
                 Ax.insert(tar);
-                Ax.write_sqlite(DB,stmt,"files",std::vector<int>{1});
-
-            }
-            
-
-            for (auto it : blacklist) {
-                if (it == tar) return "NOK";
+                Ax.write_sqlite(DB, stmt, "files", std::vector<int>{1});
             }
 
+            for (auto it : blacklist)
+            {
+                if (it == tar)
+                    return "NOK";
+            }
 
-           // for (auto iter : tickets) {
-             //   std::cout << tar << " " << iter<< std::endl;
-                      
+            // for (auto iter : tickets) {
+            //   std::cout << tar << " " << iter<< std::endl;
 
-          //  }
+            //  }
 
-
-            
             std::string cookie(req["cookie"]);
-            if (cookie == "") { cookie = std::string(req["authorization"]); }
-
-            for (auto iter : cookies) {
-                std::cout << cookie << " " << iter<< std::endl;
-                //if (iter == cookie) return "OK";
-                if (cookie.find(iter)!=std::string::npos) return "OK";
-
+            if (cookie == "")
+            {
+                cookie = std::string(req["authorization"]);
             }
-            
 
-            for (auto iter : whitelisted_folders) {
+            for (auto iter : cookies)
+            {
+                std::cout << cookie << " " << iter << std::endl;
+                // if (iter == cookie) return "OK";
+                if (cookie.find(iter) != std::string::npos)
+                    return "OK";
+            }
+
+            for (auto iter : whitelisted_folders)
+            {
                 std::cout << iter << " " << req.target() << std::endl;
-                if (iter.size() <= tar.size() && tar.substr(0, iter.size()) == iter) return "OK";
-
+                if (iter.size() <= tar.size() && tar.substr(0, iter.size()) == iter)
+                    return "OK";
             }
 
-
-                if(true){
-         //   for (auto iter : whitelisted_files) {
-          //      std::cout << iter << " " << req.target() << std::endl;
-                //if (iter == tar) return "OK";
-                            sqlite3 *DB2;
-                        sqlite3_stmt *stmt2 = 0;
-                        sqlframe Ax;
-                        sqlframe Bx;
-               auto exit = sqlite3_open("server.db", &DB2);
-                if(sqlite_check(DB2,stmt2,"whitelisted",std::vector<std::string>{"file"},std::vector<std::string>{tar})){return "OK";}
+            if (true)
+            {
+                //   for (auto iter : whitelisted_files) {
+                //      std::cout << iter << " " << req.target() << std::endl;
+                // if (iter == tar) return "OK";
+                sqlite3 *DB2;
+                sqlite3_stmt *stmt2 = 0;
+                sqlframe Ax;
+                sqlframe Bx;
+                auto exit = sqlite3_open("server.db", &DB2);
+                if (sqlite_check(DB2, stmt2, "whitelisted", std::vector<std::string>{"file"}, std::vector<std::string>{tar}))
+                {
+                    return "OK";
                 }
+            }
 
-
-            
-
-
-                
-                        sqlite3 *DB;
-                        sqlite3_stmt *stmt = 0;
-                        sqlframe Ax;
-                        sqlframe Bx;
-               auto exit = sqlite3_open("server.db", &DB);
+            sqlite3 *DB;
+            sqlite3_stmt *stmt = 0;
+            sqlframe Ax;
+            sqlframe Bx;
+            auto exit = sqlite3_open("server.db", &DB);
             /*
             Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
-               
+
             Bx.print();
-               
+
             Ax.search_sqlite(DB,stmt,"SELECT value FROM tickets WHERE value='"+tar+"';");
             std::cout<<"SELECT value FROM tickets WHERE value='"+tar+"';"<<std::endl;
-               
+
                 if (Ax.rows>0) {  //tickets.pop_back();
-               Ax.print();   
+               Ax.print();
                         //Ax.search_sqlite(DB,)
                    */
-                if(sqlite_check(DB,stmt,"tickets",std::vector<std::string>{"value"},std::vector<std::string>{tar}))      
-                {Ax.statement(DB,"DELETE FROM tickets WHERE value='"+tar+"';"); 
+            if (sqlite_check(DB, stmt, "tickets", std::vector<std::string>{"value"}, std::vector<std::string>{tar}))
+            {
+                Ax.statement(DB, "DELETE FROM tickets WHERE value='" + tar + "';");
 
-                //std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
-                 return "VALID TICKET";}
-                else{
-              
-
-                }
-
+                // std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
+                return "VALID TICKET";
+            }
+            else
+            {
+            }
 
             return "NOK";
-
         }
-        if (req.method() == http::verb::post) {
-            
+        if (req.method() == http::verb::post)
+        {
+
             std::string cookie(req["cookie"]);
-            if (cookie == "") { cookie = std::string(req["authorization"]); }
-
-            for (auto iter : cookies) {
-                std::cout << cookie << " " << iter<< std::endl;
-               // if (iter == cookie) return "OK";
-                if (cookie.find(iter)!=std::string::npos) return "OK";
-
+            if (cookie == "")
+            {
+                cookie = std::string(req["authorization"]);
             }
 
-/*
-            for (auto iter : credentials) {
-                std::cout<<iter<<" " << req.body() << std::endl;
-                if (iter == req.body()) { 
-                    
-                req.body() = "/index.html"; 
-                      
-                return "AUTHENTICATED";
-                
-                
-                }
-
-
-
+            for (auto iter : cookies)
+            {
+                std::cout << cookie << " " << iter << std::endl;
+                // if (iter == cookie) return "OK";
+                if (cookie.find(iter) != std::string::npos)
+                    return "OK";
             }
 
-        */
-        if(json::accept(req.body())){
-        std::cout<<"SELECT username FRO"<<std::endl;
+            /*
+                        for (auto iter : credentials) {
+                            std::cout<<iter<<" " << req.body() << std::endl;
+                            if (iter == req.body()) {
+
+                            req.body() = "/index.html";
+
+                            return "AUTHENTICATED";
 
 
-        json j = json::parse(req.body());
-        std::string pswd;
-        std::string usr;
-        if(j.contains("token")){pswd=j["token"];}
-        if(j.contains("password")){pswd=j["password"];}
-        if(j.contains("username")){usr=j["username"];}
-        sqlite3 *DB;
-        sqlite3_stmt *stmt = 0;
-        sqlframe Ax;
-        sqlframe Bx;
-               auto exit = sqlite3_open("server.db", &DB);
-              // Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");      
-              // Bx.print();
-            std::cout<<"SELECT username FROM users WHERE user='"+usr+"' AND password='"+pswd+"';"<<std::endl;
-            
-            Ax.search_sqlite(DB,stmt,"SELECT username FROM users WHERE username='"+usr+"' AND password='"+pswd+"';");
-            Ax.print();
-               
-                if (Ax.rows>0) {  //tickets.pop_back();
-               Ax.print();   
+                            }
 
-                 return "VALID TICKET";
 
+
+                        }
+
+                    */
+            if (json::accept(req.body()))
+            {
+                std::cout << "SELECT username FRO" << std::endl;
+
+                json j = json::parse(req.body());
+                std::string pswd;
+                std::string usr;
+                if (j.contains("token"))
+                {
+                    pswd = j["token"];
                 }
-        };
+                if (j.contains("password"))
+                {
+                    pswd = j["password"];
+                }
+                if (j.contains("username"))
+                {
+                    usr = j["username"];
+                }
+                sqlite3 *DB;
+                sqlite3_stmt *stmt = 0;
+                sqlframe Ax;
+                sqlframe Bx;
+                auto exit = sqlite3_open("server.db", &DB);
+                // Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
+                // Bx.print();
+                std::cout << "SELECT username FROM users WHERE user='" + usr + "' AND password='" + pswd + "';" << std::endl;
 
+                Ax.search_sqlite(DB, stmt, "SELECT username FROM users WHERE username='" + usr + "' AND password='" + pswd + "';");
+                Ax.print();
 
+                if (Ax.rows > 0)
+                { // tickets.pop_back();
+                    Ax.print();
+
+                    return "VALID TICKET";
+                }
+            };
 
             return "NOK";
         }
-
-
-
-
     };
-
-
 };
 
-
-static std::string check_if_file(const std::string view){
+static std::string check_if_file(const std::string view)
+{
     std::smatch match;
     std::regex r("(.+); boundary=(-+.*)");
-	//std::regex r("multipart/form-data");
-	std::string subject =view;
+    // std::regex r("multipart/form-data");
+    std::string subject = view;
     std::regex_search(subject, match, r);
-    std::cout<<match.size()<<std::endl;
-    
-    if(match.size()==3){
-    
+    std::cout << match.size() << std::endl;
 
-    return(match[2]);
+    if (match.size() == 3)
+    {
 
-   }
-   
-return("empty");
+        return (match[2]);
+    }
 
-
+    return ("empty");
 }
 
-static void parse_write_file(const std::string& body)
+static void parse_write_file(const std::string &body)
 {
 
+    std::size_t found = body.find("\n");
+    found = body.find("\n", found + 1);
+    found = body.find("\n", found + 1);
+    std::string boundary;
+    std::string filename;
 
+    std::string header = std::string(body.begin(), body.begin() + found);
 
- 
-  std::size_t found= body.find("\n");
-  found= body.find("\n",found+1);
-  found= body.find("\n",found+1);
-  std::string boundary;
-  std::string filename;
-    
+    std::cout << header << std::endl;
 
-  std::string header=std::string(body.begin(),body.begin()+found);
-  
-  std::cout << header << std::endl;
-  
-  if(true){
-	std::smatch match;
-	std::regex r("[-]+.+");
-	std::string subject =header;
-    std::regex_search(subject, match, r);
-  boundary=match[0];
-  }
-  
-  std::cout <<boundary << std::endl;
+    if (true)
+    {
+        std::smatch match;
+        std::regex r("[-]+.+");
+        std::string subject = header;
+        std::regex_search(subject, match, r);
+        boundary = match[0];
+    }
 
-  if(true){
-	std::smatch match;
-	std::regex r("filename=\"(.*)\"");
-	std::string subject =header;
-    std::regex_search(subject, match, r);
-  filename=match[1];
-  }
-  
-  std::cout << filename << std::endl;
-  
-  boundary=boundary+"--";
-  
-  found= body.find("\n",found+1);
-  auto pos1=found; 
-  auto pos2=body.find(boundary,found);
-  //std::cout << pos1 << "  " << pos2 << std::endl;
-  std::string new_body=std::string(body.begin()+pos1+1, body.begin()+pos2-2);
- // std::cout << new_body << std::endl;
- filename="downloads/"+filename;
-  std::ofstream stream(filename.c_str(), std::ios::binary);
-   stream <<new_body;
-   stream.close();
+    std::cout << boundary << std::endl;
+
+    if (true)
+    {
+        std::smatch match;
+        std::regex r("filename=\"(.*)\"");
+        std::string subject = header;
+        std::regex_search(subject, match, r);
+        filename = match[1];
+    }
+
+    std::cout << filename << std::endl;
+
+    boundary = boundary + "--";
+
+    found = body.find("\n", found + 1);
+    auto pos1 = found;
+    auto pos2 = body.find(boundary, found);
+    // std::cout << pos1 << "  " << pos2 << std::endl;
+    std::string new_body = std::string(body.begin() + pos1 + 1, body.begin() + pos2 - 2);
+    // std::cout << new_body << std::endl;
+    filename = "downloads/" + filename;
+    std::ofstream stream(filename.c_str(), std::ios::binary);
+    stream << new_body;
+    stream.close();
 }
-
 
 // Return a reasonable mime type based on the extension of a file.
 static beast::string_view
@@ -397,35 +405,54 @@ mime_type(beast::string_view path)
     auto const ext = [&path]
     {
         auto const pos = path.rfind(".");
-        if(pos == beast::string_view::npos)
+        if (pos == beast::string_view::npos)
             return beast::string_view{};
         return path.substr(pos);
     }();
-    if(iequals(ext, ".htm"))  return "text/html";
-    if(iequals(ext, ".html")) return "text/html";
-    if(iequals(ext, ".php"))  return "text/html";
-    if(iequals(ext, ".css"))  return "text/css";
-    if(iequals(ext, ".txt"))  return "text/plain";
-    if(iequals(ext, ".js"))   return "application/javascript";
-    if(iequals(ext, ".json")) return "application/json";
-    if(iequals(ext, ".xml"))  return "application/xml";
-    if(iequals(ext, ".swf"))  return "application/x-shockwave-flash";
-    if(iequals(ext, ".flv"))  return "video/x-flv";
-    if(iequals(ext, ".png"))  return "image/png";
-    if(iequals(ext, ".jpe"))  return "image/jpeg";
-    if(iequals(ext, ".jpeg")) return "image/jpeg";
-    if(iequals(ext, ".jpg"))  return "image/jpeg";
-    if(iequals(ext, ".gif"))  return "image/gif";
-    if(iequals(ext, ".bmp"))  return "image/bmp";
-    if(iequals(ext, ".ico"))  return "image/vnd.microsoft.icon";
-    if(iequals(ext, ".tiff")) return "image/tiff";
-    if(iequals(ext, ".tif"))  return "image/tiff";
-    if(iequals(ext, ".svg"))  return "image/svg+xml";
-    if(iequals(ext, ".svgz")) return "image/svg+xml";
+    if (iequals(ext, ".htm"))
+        return "text/html";
+    if (iequals(ext, ".html"))
+        return "text/html";
+    if (iequals(ext, ".php"))
+        return "text/html";
+    if (iequals(ext, ".css"))
+        return "text/css";
+    if (iequals(ext, ".txt"))
+        return "text/plain";
+    if (iequals(ext, ".js"))
+        return "application/javascript";
+    if (iequals(ext, ".json"))
+        return "application/json";
+    if (iequals(ext, ".xml"))
+        return "application/xml";
+    if (iequals(ext, ".swf"))
+        return "application/x-shockwave-flash";
+    if (iequals(ext, ".flv"))
+        return "video/x-flv";
+    if (iequals(ext, ".png"))
+        return "image/png";
+    if (iequals(ext, ".jpe"))
+        return "image/jpeg";
+    if (iequals(ext, ".jpeg"))
+        return "image/jpeg";
+    if (iequals(ext, ".jpg"))
+        return "image/jpeg";
+    if (iequals(ext, ".gif"))
+        return "image/gif";
+    if (iequals(ext, ".bmp"))
+        return "image/bmp";
+    if (iequals(ext, ".ico"))
+        return "image/vnd.microsoft.icon";
+    if (iequals(ext, ".tiff"))
+        return "image/tiff";
+    if (iequals(ext, ".tif"))
+        return "image/tiff";
+    if (iequals(ext, ".svg"))
+        return "image/svg+xml";
+    if (iequals(ext, ".svgz"))
+        return "image/svg+xml";
     return "application/text";
 }
-
-
 
 // Append an HTTP rel-path to a local filesystem path.
 // The returned path is normalized for the platform.
@@ -434,20 +461,20 @@ path_cat(
     beast::string_view base,
     beast::string_view path)
 {
-    if(base.empty())
+    if (base.empty())
         return std::string(path);
     std::string result(base);
 #ifdef BOOST_MSVC
     char constexpr path_separator = '\\';
-    if(result.back() == path_separator)
+    if (result.back() == path_separator)
         result.resize(result.size() - 1);
     result.append(path.data(), path.size());
-    for(auto& c : result)
-        if(c == '/')
+    for (auto &c : result)
+        if (c == '/')
             c = path_separator;
 #else
     char constexpr path_separator = '/';
-    if(result.back() == path_separator)
+    if (result.back() == path_separator)
         result.resize(result.size() - 1);
     result.append(path.data(), path.size());
 #endif
@@ -455,34 +482,29 @@ path_cat(
 }
 // Report a failure
 
-
-
-
-template<
+template <
     class Body, class Allocator,
     class Send, class callback>
-void
-handle_request(
+void handle_request(
     beast::string_view doc_root,
-    http::request<Body, http::basic_fields<Allocator>>&& req,
-    Send&& send,callback function)
+    http::request<Body, http::basic_fields<Allocator>> &&req,
+    Send &&send, callback function)
 {
-    
 
-	    auto const ok_response =
-    [&req](beast::string_view why)
+    auto const ok_response =
+        [&req](beast::string_view why)
     {
         http::response<http::string_body> res{http::status::ok, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        //res.set(http::field::content_type, "text/html");
+        // res.set(http::field::content_type, "text/html");
         res.keep_alive(req.keep_alive());
         res.body() = std::string(why);
         res.prepare_payload();
         return res;
-    };    
-	    
-	auto const bad_request =
-    [&req](beast::string_view why)
+    };
+
+    auto const bad_request =
+        [&req](beast::string_view why)
     {
         http::response<http::string_body> res{http::status::bad_request, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -495,7 +517,7 @@ handle_request(
 
     // Returns a not found response
     auto const not_found =
-    [&req](beast::string_view target)
+        [&req](beast::string_view target)
     {
         http::response<http::string_body> res{http::status::not_found, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -508,7 +530,7 @@ handle_request(
 
     // Returns a server error response
     auto const server_error =
-    [&req](beast::string_view what)
+        [&req](beast::string_view what)
     {
         http::response<http::string_body> res{http::status::internal_server_error, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -519,134 +541,127 @@ handle_request(
         return res;
     };
 
-
     std::cout << "handle" << std::endl;
-	    // Make sure we can handle the method
-    if( req.method() != http::verb::get &&
+    // Make sure we can handle the method
+    if (req.method() != http::verb::get &&
         req.method() != http::verb::head && req.method() != http::verb::post)
         return send(bad_request("Unknown HTTP-method"));
-	    
-	    
+
     auto auth_response = function.authentication(req);
 
-    if (auth_response == "AUTHENTICATED" || auth_response=="VALID TICKET") { 
-    std::cout << auth_response << std::endl;
- 
-    std::cout << "DONE" << std::endl;
-    /* REDIRECT POST
-       http::response<http::empty_body> res{http::status::found, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::location, "/index.html");
-        res.set(http::field::set_cookie,function.cookies[0]);
-        res.keep_alive(req.keep_alive());
-        return send(std::move(res));
-      */  
-     jsonframe msg;
-    msg.insert(std::vector<std::string>{"token",function.cookies[0]});
-    msg.insert(std::vector<std::string>{"redirect","index.html"});
-   
+    if (auth_response == "AUTHENTICATED" || auth_response == "VALID TICKET")
+    {
+        std::cout << auth_response << std::endl;
 
-     std::string out_path="gasp.json";
-     //http::file_body::value_type p_body=
-     
-     	    http::response<http::string_body> res{
-                
-                //std::make_tuple(std::move(p_body)),
-                http::status::ok, req.version() };
-            res.body()=msg.to_json().dump();
+        std::cout << "DONE" << std::endl;
+        /* REDIRECT POST
+           http::response<http::empty_body> res{http::status::found, req.version()};
             res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-            res.set(http::field::content_type, mime_type(out_path));
-            res.set(http::field::set_cookie, function.cookies[0]);
-            // res.content_length(size);
+            res.set(http::field::location, "/index.html");
+            res.set(http::field::set_cookie,function.cookies[0]);
             res.keep_alive(req.keep_alive());
             return send(std::move(res));
+          */
+        jsonframe msg;
+        std::string cookie = function.cookies[0];
+        msg.insert(std::vector<std::string>{"token", cookie});
+        msg.insert(std::vector<std::string>{"redirect", "index.html"});
 
+        std::string out_path = "for_mime.json";
+        // http::file_body::value_type p_body=
+
+        http::response<http::string_body> res{
+
+            // std::make_tuple(std::move(p_body)),
+            http::status::ok, req.version()};
+        res.body() = msg.to_json().dump();
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, mime_type(out_path));
+        res.set(http::field::set_cookie, cookie);
+        // res.content_length(size);
+        res.keep_alive(req.keep_alive());
+        return send(std::move(res));
     }
-    
-    
-    if (auth_response != "OK") { 
+
+    if (auth_response != "OK")
+    {
         std::cout << "NOT OK REQUEST" << std::endl;
-        return send(bad_request("Illegal request- not authorized")); }
+        return send(bad_request("Illegal request- not authorized"));
+    }
 
+    // Respond to POST request
 
+    if (req.method() == http::verb::post)
+    {
 
-
-  // Respond to POST request
-
-    if (req.method() == http::verb::post) {
- 
         auto test = std::string(req.at(http::field::content_type));
         std::string out_path;
         auto cp = check_if_file(test);
-        if (cp != "empty") {//std::cout<<check_if_file(test)<<std::endl;
+        if (cp != "empty")
+        { // std::cout<<check_if_file(test)<<std::endl;
             parse_write_file(req.body());
             return send(ok_response("Upload completed"));
         }
-	else {
-             out_path = function.post(req);
+        else
+        {
+            out_path = function.post(req);
 
-             std::cout << out_path << std::endl;
-             }
-        
-         out_path = path_cat(doc_root, out_path);
-      //  if (req.target().back() == '/')
+            std::cout << out_path << std::endl;
+        }
+
+        out_path = path_cat(doc_root, out_path);
+        //  if (req.target().back() == '/')
         //    path.append("index.html");
-	    beast::error_code ecc;
-            http::file_body::value_type p_body;
-            p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
-	    
-            // Handle the case where the file doesn't exist
-            if (ecc == beast::errc::no_such_file_or_directory)
-                return send(not_found(out_path));
-            
-	    http::response<http::file_body> res{
-                std::piecewise_construct,
-                std::make_tuple(std::move(p_body)),
-                std::make_tuple(http::status::ok, req.version()) };
-            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-            res.set(http::field::content_type, mime_type(out_path));
-            // res.content_length(size);
-            res.keep_alive(req.keep_alive());
-            return send(std::move(res));
+        beast::error_code ecc;
+        http::file_body::value_type p_body;
+        p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
 
+        // Handle the case where the file doesn't exist
+        if (ecc == beast::errc::no_such_file_or_directory)
+            return send(not_found(out_path));
+
+        http::response<http::file_body> res{
+            std::piecewise_construct,
+            std::make_tuple(std::move(p_body)),
+            std::make_tuple(http::status::ok, req.version())};
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, mime_type(out_path));
+        // res.content_length(size);
+        res.keep_alive(req.keep_alive());
+        return send(std::move(res));
     }
 
-
-
     // Request path must be absolute and not contain "..".
-    if( req.target().empty() ||
+    if (req.target().empty() ||
         req.target()[0] != '/' ||
         req.target().find("..") != beast::string_view::npos)
         return send(bad_request("Illegal request-target"));
 
-
-
-
     // Build the path to the requested file
     std::string path = path_cat(doc_root, req.target());
-    if(req.target().back() == '/')
-    path.append("index.html");
+    if (req.target().back() == '/')
+        path.append("index.html");
 
     // Attempt to open the file
     beast::error_code ec;
     http::file_body::value_type body;
     body.open(path.c_str(), beast::file_mode::scan, ec);
-    std::cout<<path<<std::endl;
+    std::cout << path << std::endl;
     // Handle the case where the file doesn't exist
-    if(ec == beast::errc::no_such_file_or_directory)
+    if (ec == beast::errc::no_such_file_or_directory)
         return send(not_found(req.target()));
     // Handle an unknown error
-    if(ec)
+    if (ec)
         return send(server_error(ec.message()));
     // Cache the size since we need it after the move
     auto const size = body.size();
-	    
+
     // Respond to HEAD request
-    if(req.method() == http::verb::head)
+    if (req.method() == http::verb::head)
     {
         http::response<http::empty_body> res{http::status::ok, req.version()};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-      //  res.set(http::field::content_type, mime_type(path));
+        //  res.set(http::field::content_type, mime_type(path));
         res.content_length(size);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
@@ -664,5 +679,4 @@ handle_request(
     return send(std::move(res));
 }
 
-
-//void httpserver_ssl(bundle func);
+// void httpserver_ssl(bundle func);

@@ -157,6 +157,16 @@ public:
         
        // handle_request(*doc_root_, std::move(req_), lambda_,[](std::vector<std::string>){return(std::string("<!DOCTYPE html><html><body><h1>My Callback</h1><p>My first callback.</p></body></html>"));});
      //handle_request(*doc_root_, std::move(req_), lambda_,function_);
+    std::cout<<stream_.socket().lowest_layer().remote_endpoint().address().to_string()<<std::endl;
+    std::string ip=stream_.socket().lowest_layer().remote_endpoint().address().to_string();
+    sqlframe logs(0,3);
+    logs.insert(std::vector<std::string>{"IP_ADRESS"});
+    logs.insert(std::vector<std::string>{ip});
+    logs.add_timestamp("TIMESTAMP");
+    sqlite3_stmt *stmt = 0;
+    sqlite3 *DB;
+    auto exit = sqlite3_open("logs.db", &DB);
+    logs.write_sqlite(DB,stmt,"Logs");
      handle_request(*doc_root_, parser_->release(), lambda_,function_);
    
     
