@@ -60,8 +60,8 @@ int main(//int argc, char* argv[]
     sqlframe B(0,2);
     B.insert("username");
     B.insert("password");
-    B.insert("duslxx");
-    B.insert("x7bhm3Ma");
+    B.insert("admin");
+    B.insert("abc");
 
     B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
 

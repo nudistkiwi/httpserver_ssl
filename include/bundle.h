@@ -164,14 +164,14 @@ public:
             std::string tar(req.target());
             if (true)
             {
-                sqlite3 *DB;
-                sqlite3_stmt *stmt = 0;
+                //sqlite3 *DB;
+                //sqlite3_stmt *stmt = 0;
                 sqlframe Ax(0, 1);
                 sqlframe Bx;
-                auto exit = sqlite3_open("server.db", &DB);
+                //auto exit = sqlite3_open("server.db", &DB);
                 Ax.insert("file");
                 Ax.insert(tar);
-                Ax.write_sqlite(DB, stmt, "files", std::vector<int>{1});
+                Ax.write_sqlite("server.db", "files", std::vector<int>{1});
             }
 
             for (auto it : blacklist)
@@ -548,7 +548,7 @@ void handle_request(
         return send(bad_request("Unknown HTTP-method"));
 
     auto auth_response = function.authentication(req);
-
+    //auth_response="OK";
     if (auth_response == "AUTHENTICATED" || auth_response == "VALID TICKET")
     {
         std::cout << auth_response << std::endl;
