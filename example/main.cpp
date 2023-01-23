@@ -73,10 +73,10 @@ int main(//int argc, char* argv[]
     C.insert("/login.html");
     C.insert("/script.js");
     C.insert("/script2.js");
-    C.insert("/");
-    C.insert("/index.html");
+    //C.insert("/");
+    //C.insert("/index.html");
 
-    C.write_sqlite("server.db","whitelisted");
+    C.write_sqlite("server.db","whitelisted",std::vector<int>{1});
 
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
