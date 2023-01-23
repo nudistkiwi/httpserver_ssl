@@ -65,6 +65,19 @@ int main(//int argc, char* argv[]
 
     B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
 
+
+    sqlframe C(0,1);
+    C.insert("file");
+    
+    C.insert("/style.css");
+    C.insert("/login.html");
+    C.insert("/script.js");
+    C.insert("/script2.js");
+    C.insert("/");
+    C.insert("/index.html");
+
+    C.write_sqlite("server.db","whitelisted");
+
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
     std::function<std::string(http::request<http::string_body>&)> func=callback;
