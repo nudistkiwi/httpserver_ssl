@@ -71,7 +71,7 @@ public:
 
     };
 
-    https_client_request::https_client_request(std::string type, std::string target) {
+    https_client_request(std::string type, std::string target) {
         /*
 
         */
