@@ -24,12 +24,31 @@ std::cout<<"7...ingest clipboard"<<std::endl;
 std::cout<<"8...search for element:"<<std::endl;
 std::cout<<"11...clipboard search:"<<std::endl;
 */
-std::string callback(http::request<http::string_body>& A){
-   
-   
+
+std::string callback(http::request<http::string_body>& A) {
 
 
-    return("/index.html");};
+    std::cout << "POST REQUEST  " << A << std::endl;
+    https_client_request req2("POST", "/1/messages.json");
+    //https_client_request req("GET","/monitor/?line=14A&station=Keplerplatz&towards=Reumannplatz&countdown");
+    json JS;
+    //	dataframe hallo;
+    //	hallo.write_file(A);
+
+    JS["user"] = "u25eipbejdp986qk5cv6d2d9kt8x4d";
+    JS["message"] = "HAALLOOO";
+    JS["token"] = "ahh7x5h32p2upqohfny3s5ndyqtw25";
+
+
+
+    req2.set_body(JS);
+    //req.send_request("vtapi.floscodes.net","443");
+    req2.send_request("api.pushover.net", "443");
+
+
+    return("/success.html");
+};
+
 
 int main(//int argc, char* argv[]
 )

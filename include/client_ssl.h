@@ -11,7 +11,7 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;
 //using request_body_t = boost::beast::http::string_body;
 
-std::string mime_types(std::string path)
+static std::string mime_types(std::string path)
 {
 
     if (path.find(".htm") != std::string::npos)  return "text/html";

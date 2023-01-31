@@ -23,7 +23,7 @@
 //#include <json.hpp>
 #include <ctime>
 #include <time.h>
-//#include <client_ssl.h>
+#include <client_ssl.h>
 #include <sqlframe.h>
 #include <jsonframe.h>
 
