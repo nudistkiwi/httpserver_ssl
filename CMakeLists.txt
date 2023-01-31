@@ -12,6 +12,7 @@ project(httpserver_ssl VERSION 1.0)
 
 
 find_package(Boost COMPONENTS thread system REQUIRED)
+find_package(OpenSSL)
 
 if (UNIX)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
@@ -35,9 +36,10 @@ endif (WIN32)
 add_subdirectory(library)
 add_executable(test example/main.cpp)
 
-option(USE_SSL "Use no TLS" OFF) #OFF by default
+
+
+option(USE_SSL "Use no TLS" ON) #OFF by default
 if(USE_SSL)
-find_package(OpenSSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)
 target_include_directories(httpserver_ssl PUBLIC include)
@@ -52,7 +54,7 @@ target_link_libraries (httpserver_ssl
  #target_include_directories(test Public include/ssl)
 else()
  add_library(httpserver_ssl INTERFACE)
- target_link_libraries (httpserver_ssl INTERFACE sqlframe jsonframe baseframe)
+ target_link_libraries (httpserver_ssl INTERFACE sqlframe jsonframe baseframe OpenSSL::SSL OpenSSL::Crypto)
  target_include_directories(httpserver_ssl INTERFACE include/http)
  #target_include_directories(httpserver_ssl INTERFACE library/dataframe/include/sqlframe)
  #target_include_directories(test INTERFACE include/http)

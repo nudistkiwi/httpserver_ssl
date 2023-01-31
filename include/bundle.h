@@ -7,6 +7,7 @@
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/beast/ssl.hpp>
 //#include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -22,13 +23,13 @@
 //#include <json.hpp>
 #include <ctime>
 #include <time.h>
-
+//#include <client_ssl.h>
 #include <sqlframe.h>
 #include <jsonframe.h>
 
 
 
-bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename, std::vector<std::string> cols, std::vector<std::string> val)
+static bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename, std::vector<std::string> cols, std::vector<std::string> val)
 {
 
     std::cout << "INTRO" << std::endl;
@@ -680,3 +681,5 @@ void handle_request(
 }
 
 // void httpserver_ssl(bundle func);
+
+

@@ -4,7 +4,7 @@
 //#include <httpserver_ssl.h>
 #include "server_certificate.hpp"
 #include <bundle.h>
-#include <boost/beast/ssl.hpp>
+//#include <boost/beast/ssl.hpp>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
