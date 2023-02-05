@@ -24,8 +24,7 @@
 #include <ctime>
 #include <time.h>
 #include <client_ssl.h>
-#include <sqlframe.h>
-#include <jsonframe.h>
+#include <dataframe.h>
 
 
 
@@ -51,7 +50,7 @@ static bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename,
         query.pop_back();
         query.pop_back();
         query.back() = ';';
-        sqlframe Ax;
+        dataframe Ax;
         std::cout << query << std::endl;
         Ax.search_sqlite(DB, stmt, query);
 
@@ -167,8 +166,8 @@ public:
             {
                 //sqlite3 *DB;
                 //sqlite3_stmt *stmt = 0;
-                sqlframe Ax(0, 1);
-                sqlframe Bx;
+                dataframe Ax(0, 1);
+                dataframe Bx;
                 //auto exit = sqlite3_open("server.db", &DB);
                 Ax.insert("file");
                 Ax.insert(tar);
@@ -214,8 +213,8 @@ public:
                 // if (iter == tar) return "OK";
                 sqlite3 *DB2;
                 sqlite3_stmt *stmt2 = 0;
-                sqlframe Ax;
-                sqlframe Bx;
+                dataframe Ax;
+                dataframe Bx;
                 auto exit = sqlite3_open("server.db", &DB2);
                 if (sqlite_check(DB2, stmt2, "whitelisted", std::vector<std::string>{"file"}, std::vector<std::string>{tar}))
                 {
@@ -225,8 +224,8 @@ public:
 
             sqlite3 *DB;
             sqlite3_stmt *stmt = 0;
-            sqlframe Ax;
-            sqlframe Bx;
+            dataframe Ax;
+            dataframe Bx;
             auto exit = sqlite3_open("server.db", &DB);
             /*
             Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
@@ -308,8 +307,8 @@ public:
                 }
                 sqlite3 *DB;
                 sqlite3_stmt *stmt = 0;
-                sqlframe Ax;
-                sqlframe Bx;
+                dataframe Ax;
+                dataframe Bx;
                 auto exit = sqlite3_open("server.db", &DB);
                 // Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
                 // Bx.print();
@@ -563,7 +562,7 @@ void handle_request(
             res.keep_alive(req.keep_alive());
             return send(std::move(res));
           */
-        jsonframe msg;
+        dataframe msg;
         std::string cookie = function.cookies[0];
         msg.insert(std::vector<std::string>{"token", cookie});
         msg.insert(std::vector<std::string>{"redirect", "index.html"});

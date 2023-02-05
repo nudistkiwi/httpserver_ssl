@@ -160,7 +160,7 @@ public:
      //handle_request(*doc_root_, std::move(req_), lambda_,function_);
     std::cout<<stream_.socket().lowest_layer().remote_endpoint().address().to_string()<<std::endl;
     std::string ip=stream_.socket().lowest_layer().remote_endpoint().address().to_string();
-    sqlframe logs(0,3);
+    dataframe logs(0,3);
     logs.insert(std::vector<std::string>{"IP_ADRESS"});
     logs.insert(std::vector<std::string>{ip});
     logs.add_timestamp("TIMESTAMP");

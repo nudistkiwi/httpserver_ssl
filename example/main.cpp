@@ -68,7 +68,7 @@ int main(//int argc, char* argv[]
     sqlite3 *DB;
     sqlite3_stmt *stmt = 0;
    auto exit = sqlite3_open("server.db", &DB);
-    sqlframe A(0,1);
+    dataframe A(0,1);
     A.insert("value");
     A.insert("/bettercallsaul123");
     A.insert("/bettercallsaul1234");
@@ -76,7 +76,7 @@ int main(//int argc, char* argv[]
     A.insert("/bettercallsaul123456");
     A.write_sqlite(DB,stmt,"tickets");
 
-    sqlframe B(0,2);
+    dataframe B(0,2);
     B.insert("username");
     B.insert("password");
     B.insert("admin");
@@ -85,7 +85,7 @@ int main(//int argc, char* argv[]
     B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
 
 
-    sqlframe C(0,1);
+    dataframe C(0,1);
     C.insert("file");
     
     C.insert("/style.css");
