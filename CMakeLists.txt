@@ -38,7 +38,7 @@ add_executable(test example/main.cpp)
 
 
 
-option(USE_SSL "Use no TLS" ON) #OFF by default
+option(USE_SSL "Use no TLS" OFF) #OFF by default
 if(USE_SSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)
@@ -53,12 +53,14 @@ target_link_libraries (httpserver_ssl
 
  #target_include_directories(test Public include/ssl)
 else()
- add_library(httpserver_ssl INTERFACE)
- target_link_libraries (httpserver_ssl INTERFACE dataframe OpenSSL::SSL OpenSSL::Crypto)
- target_include_directories(httpserver_ssl INTERFACE include/http)
- #target_include_directories(httpserver_ssl INTERFACE library/dataframe/include/sqlframe)
- #target_include_directories(test INTERFACE include/http)
- target_include_directories(httpserver_ssl INTERFACE include)
+ #add_library(httpserver_ssl INTERFACE)
+ add_library(httpserver_ssl STATIC src/httpserver.cpp)
+ target_link_libraries (httpserver_ssl OpenSSL::SSL OpenSSL::Crypto dataframe)
+ #target_link_libraries (httpserver_ssl INTERFACE dataframe OpenSSL::SSL OpenSSL::Crypto)
+ #target_include_directories(httpserver_ssl INTERFACE include/http)
+ #target_include_directories(httpserver_ssl INTERFACE include)
+ target_include_directories(httpserver_ssl PUBLIC include/http)
+ target_include_directories(httpserver_ssl PUBLIC include)
 
 endif(USE_SSL)
 unset(USE_SSL) # <---- this is the important!!

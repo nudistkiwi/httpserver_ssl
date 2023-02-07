@@ -27,7 +27,7 @@ std::cout<<"11...clipboard search:"<<std::endl;
 
 std::string callback(http::request<http::string_body>& A) {
 
-
+/*
     std::cout << "POST REQUEST  " << A << std::endl;
     https_client_request req2("POST", "/1/messages.json");
     //https_client_request req("GET","/monitor/?line=14A&station=Keplerplatz&towards=Reumannplatz&countdown");
@@ -45,8 +45,8 @@ std::string callback(http::request<http::string_body>& A) {
     //req.send_request("vtapi.floscodes.net","443");
     req2.send_request("api.pushover.net", "443");
 
-
-    return("/success.html");
+*/
+    return("/login.html");
 };
 
 
@@ -64,7 +64,7 @@ int main(//int argc, char* argv[]
         return EXIT_FAILURE;
     }
     */
-
+/*
     sqlite3 *DB;
     sqlite3_stmt *stmt = 0;
    auto exit = sqlite3_open("server.db", &DB);
@@ -79,8 +79,8 @@ int main(//int argc, char* argv[]
     dataframe B(0,2);
     B.insert("username");
     B.insert("password");
-    B.insert("admin");
-    B.insert("abc");
+    B.insert("userzero");
+    B.insert("abc314");
 
     B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
 
@@ -96,7 +96,7 @@ int main(//int argc, char* argv[]
     //C.insert("/index.html");
 
     C.write_sqlite("server.db","whitelisted",std::vector<int>{1});
-
+*/
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
     std::function<std::string(http::request<http::string_body>&)> func=callback;

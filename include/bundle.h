@@ -105,17 +105,57 @@ public:
     std::vector<std::string> blacklist = std::vector<std::string>{"/database.db", "/localhost.pem", "/localhost.decrypted.key"};
     // std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
 
-    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_) { post_func = post_func_; };
+    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_) { 
+        post_func = post_func_;
+        set_server_config(); };
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, char *ports_)
     {
         post_func = post_func_;
         ports = ports_;
+        set_server_config();
     };
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, std::function<std::string(http::request<http::string_body> &)> get_func_)
     {
         post_func = post_func_;
         get_func = get_func_;
+        set_server_config();
     };
+
+    void set_server_config(){
+     //   sqlite3 *DB;
+    //sqlite3_stmt *stmt = 0;
+   //auto exit = sqlite3_open("server.db", &DB);
+    dataframe A(0,1);
+    A.insert("value");
+    A.insert("/bettercallsaul123");
+    A.insert("/bettercallsaul1234");
+    A.insert("/bettercallsaul12345");
+    A.insert("/bettercallsaul123456");
+    //A.write_sqlite(DB,stmt,"tickets");
+    A.write_sqlite("server.db","tickets");
+
+    dataframe B(0,2);
+    B.insert("username");
+    B.insert("password");
+    B.insert("userzero");
+    B.insert("abc314");
+
+    B.write_sqlite("server.db","users",std::vector<int>{1});
+
+
+    dataframe C(0,1);
+    C.insert("file");
+    
+    C.insert("/style.css");
+    C.insert("/login.html");
+    C.insert("/script.js");
+    //C.insert("/");
+    //C.insert("/index.html");
+
+    C.write_sqlite("server.db","whitelisted",std::vector<int>{1});
+
+    }
+
     /*
      void hash(){for(auto& iter:cookies){
          auto date=currentDateTime();
