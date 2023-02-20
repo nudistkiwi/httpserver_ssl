@@ -46,7 +46,7 @@ std::string callback(http::request<http::string_body>& A) {
     req2.send_request("api.pushover.net", "443");
 
 */
-    return("/login.html");
+    return("/success.json");
 };
 
 

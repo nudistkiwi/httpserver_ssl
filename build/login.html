@@ -10,15 +10,22 @@
 <!-- partial:index.partial.html -->
 <section class='login' id='login'>
   <div class='head'>
-  <h1 class='company'>Monkey Business Login</h1>
+  <h1 class='company'>Login</h1>
   </div>
-  <p class='msg'>Welcome back</p>
+  <p class='msg'>Hello there</p>
   <div class='form'>
     <form>
   <input type="text" placeholder='Username' class='text' id='username' required><br>
-  <input type="password" placeholder='••••••••••••••' class='password'><br>
+  <input type="password" placeholder='••••••••••••••' class='password' id='password'><br>
+
+  <div id='new-password' style='display:none'>
+    <input type="password" placeholder='New Password' class='password' id='newpassword'><br>
+  </div>
+  <div id='confirm-new-password' style='display:none'>
+    <input type="password" placeholder='Confirm Password' class='password' id='cnewpassword'><br>
+  </div>
   <a href="#" class='btn-login' id='do-login'>Login</a>
-  <a href="#" class='forgot'>Forgot?</a>
+  <a href="#" class='forgot' id='do-change'>Change Password</a>
     </form>
   </div>
 </section>

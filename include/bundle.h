@@ -93,6 +93,9 @@ class bundle
     // std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password=x7bhm3Ma" };
 
 public:
+    bool open_server;
+    int cookie_reset;
+    time_t start_time;
     char *ports = "8080";
     std::vector<std::string> cookies = std::vector<std::string>{"FcY6roNeX1nYZiwjJoN3", "vsCmKwbAzXmydPRahVPH", "Wff7ok2VxIfy4Y8QHiPp", "3nMTIevLkOi7lahVSISR", "wFflv26AVYpI3BPkdwk7"};
     // std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
@@ -125,6 +128,9 @@ public:
      //   sqlite3 *DB;
     //sqlite3_stmt *stmt = 0;
    //auto exit = sqlite3_open("server.db", &DB);
+    open_server=false;
+    cookie_reset=3600;
+    start_time=std::time(nullptr);
     dataframe A(0,1);
     A.insert("value");
     A.insert("/bettercallsaul123");
@@ -176,8 +182,14 @@ public:
     {
 
 
+        if(open_server) return "OK";
 
         auto date = currentDateTime();
+        time_t time=std::time(nullptr);
+        int64_t elapsed= int64_t(time-start_time);
+        auto roll= elapsed/cookie_reset;
+        std::string pre=std::to_string(start_time+roll);
+
         /*
         std::for_each(cookies.begin(),cookies.end(),
         //[](std::string& Ad){A=std::to_string(std::hash(Ad));}
@@ -191,10 +203,11 @@ public:
         {
 
             date = date.substr(0, 13);
-            std::cout << date << std::endl;
+            std::cout << date <<" "<<roll<<" "<<start_time<< std::endl;
             // iter=date+iter;
 
-            iter = std::to_string(boost::hash_value(date + iter));
+            //iter = std::to_string(boost::hash_value(date + iter));
+            iter = std::to_string(boost::hash_value(pre + iter));
         }
         //   return "OK";currentDateTime()+
 
@@ -329,7 +342,7 @@ public:
             if (json::accept(req.body()))
             {
                 std::cout << "SELECT username FRO" << std::endl;
-
+                std::cout<<req.body()<<std::endl;
                 json j = json::parse(req.body());
                 std::string pswd;
                 std::string usr;
@@ -345,6 +358,11 @@ public:
                 {
                     usr = j["username"];
                 }
+                if (j.contains("new_password"))
+                {
+                    pswd = j["new_password"];
+                }
+
                 sqlite3 *DB;
                 sqlite3_stmt *stmt = 0;
                 dataframe Ax;
@@ -357,9 +375,26 @@ public:
                 Ax.search_sqlite(DB, stmt, "SELECT username FROM users WHERE username='" + usr + "' AND password='" + pswd + "';");
                 Ax.print();
 
+
+
                 if (Ax.rows > 0)
                 { // tickets.pop_back();
                     Ax.print();
+
+                if (j.contains("new_password") && j.contains("confirm_new_password"))
+                {
+                    if(j["new_password"]==j["confirm_new_password"]){
+                    pswd = j["new_password"];
+                    dataframe A(0,2);
+                    A.insert("username");
+                    A.insert("password");
+                    A.insert(usr);
+                    A.insert(pswd);
+                    A.write_sqlite("server.db","users",std::vector<int>{1});
+                    }
+                    else{return "NOK";}
+
+                }
 
                     return "VALID TICKET";
                 }
