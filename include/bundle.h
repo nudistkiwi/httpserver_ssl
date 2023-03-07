@@ -8,7 +8,7 @@
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/beast/ssl.hpp>
-//#include <boost/tokenizer.hpp>
+// #include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cstdlib>
 #include <functional>
@@ -20,13 +20,11 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
-//#include <json.hpp>
+// #include <json.hpp>
 #include <ctime>
 #include <time.h>
 #include <client_ssl.h>
 #include <dataframe.h>
-
-
 
 static bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename, std::vector<std::string> cols, std::vector<std::string> val)
 {
@@ -83,12 +81,20 @@ static const std::string currentDateTime()
     return buf;
 }
 
+
+static std::string upload_func_standard(std::string){
+
+return "Upload Complete";
+
+}
+
 class bundle
 {
     std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> test;
     std::function<std::string(http::request<http::string_body> &)> post_func;
     std::function<std::string(http::request<http::string_body> &)> get_func;
     std::function<std::string(http::request<http::string_body> &)> auth_func;
+    std::function<std::string(std::string)> upload_func=upload_func_standard;
 
     // std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password=x7bhm3Ma" };
 
@@ -108,9 +114,11 @@ public:
     std::vector<std::string> blacklist = std::vector<std::string>{"/database.db", "/localhost.pem", "/localhost.decrypted.key"};
     // std::vector<std::string> blacklisted_folders = std::vector<std::string>{};
 
-    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_) { 
+    bundle(std::function<std::string(http::request<http::string_body> &)> post_func_)
+    {
         post_func = post_func_;
-        set_server_config(); };
+        set_server_config();
+    };
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, char *ports_)
     {
         post_func = post_func_;
@@ -124,42 +132,41 @@ public:
         set_server_config();
     };
 
-    void set_server_config(){
-     //   sqlite3 *DB;
-    //sqlite3_stmt *stmt = 0;
-   //auto exit = sqlite3_open("server.db", &DB);
-    open_server=false;
-    cookie_reset=3600;
-    start_time=std::time(nullptr);
-    dataframe A(0,1);
-    A.insert("value");
-    A.insert("/bettercallsaul123");
-    A.insert("/bettercallsaul1234");
-    A.insert("/bettercallsaul12345");
-    A.insert("/bettercallsaul123456");
-    //A.write_sqlite(DB,stmt,"tickets");
-    A.write_sqlite("server.db","tickets");
+    void set_server_config()
+    {
+        //   sqlite3 *DB;
+        // sqlite3_stmt *stmt = 0;
+        // auto exit = sqlite3_open("server.db", &DB);
+        open_server = true;
+        cookie_reset = 3600;
+        start_time = std::time(nullptr);
+        dataframe A(0, 1);
+        A.insert("value");
+        A.insert("/bettercallsaul123");
+        A.insert("/bettercallsaul1234");
+        A.insert("/bettercallsaul12345");
+        A.insert("/bettercallsaul123456");
+        // A.write_sqlite(DB,stmt,"tickets");
+        A.write_sqlite("server.db", "tickets");
 
-    dataframe B(0,2);
-    B.insert("username");
-    B.insert("password");
-    B.insert("userzero");
-    B.insert("abc314");
+        dataframe B(0, 2);
+        B.insert("username");
+        B.insert("password");
+        B.insert("userzero");
+        B.insert("abc314");
 
-    B.write_sqlite("server.db","users",std::vector<int>{1});
+        B.write_sqlite("server.db", "users", std::vector<int>{1});
 
+        dataframe C(0, 1);
+        C.insert("file");
 
-    dataframe C(0,1);
-    C.insert("file");
-    
-    C.insert("/style.css");
-    C.insert("/login.html");
-    C.insert("/script.js");
-    //C.insert("/");
-    //C.insert("/index.html");
+        C.insert("/style.css");
+        C.insert("/login.html");
+        C.insert("/script.js");
+        // C.insert("/");
+        // C.insert("/index.html");
 
-    C.write_sqlite("server.db","whitelisted",std::vector<int>{1});
-
+        C.write_sqlite("server.db", "whitelisted", std::vector<int>{1});
     }
 
     /*
@@ -181,14 +188,14 @@ public:
     std::string authentication(http::request<http::string_body> &req)
     {
 
-
-        if(open_server) return "OK";
+        if (open_server)
+            return "OK";
 
         auto date = currentDateTime();
-        time_t time=std::time(nullptr);
-        int64_t elapsed= int64_t(time-start_time);
-        auto roll= elapsed/cookie_reset;
-        std::string pre=std::to_string(start_time+roll);
+        time_t time = std::time(nullptr);
+        int64_t elapsed = int64_t(time - start_time);
+        auto roll = elapsed / cookie_reset;
+        std::string pre = std::to_string(start_time + roll);
 
         /*
         std::for_each(cookies.begin(),cookies.end(),
@@ -203,10 +210,10 @@ public:
         {
 
             date = date.substr(0, 13);
-            std::cout << date <<" "<<roll<<" "<<start_time<< std::endl;
+            std::cout << date << " " << roll << " " << start_time << std::endl;
             // iter=date+iter;
 
-            //iter = std::to_string(boost::hash_value(date + iter));
+            // iter = std::to_string(boost::hash_value(date + iter));
             iter = std::to_string(boost::hash_value(pre + iter));
         }
         //   return "OK";currentDateTime()+
@@ -217,11 +224,11 @@ public:
             std::string tar(req.target());
             if (true)
             {
-                //sqlite3 *DB;
-                //sqlite3_stmt *stmt = 0;
+                // sqlite3 *DB;
+                // sqlite3_stmt *stmt = 0;
                 dataframe Ax(0, 1);
                 dataframe Bx;
-                //auto exit = sqlite3_open("server.db", &DB);
+                // auto exit = sqlite3_open("server.db", &DB);
                 Ax.insert("file");
                 Ax.insert(tar);
                 Ax.write_sqlite("server.db", "files", std::vector<int>{1});
@@ -342,7 +349,7 @@ public:
             if (json::accept(req.body()))
             {
                 std::cout << "SELECT username FRO" << std::endl;
-                std::cout<<req.body()<<std::endl;
+                std::cout << req.body() << std::endl;
                 json j = json::parse(req.body());
                 std::string pswd;
                 std::string usr;
@@ -375,26 +382,27 @@ public:
                 Ax.search_sqlite(DB, stmt, "SELECT username FROM users WHERE username='" + usr + "' AND password='" + pswd + "';");
                 Ax.print();
 
-
-
                 if (Ax.rows > 0)
                 { // tickets.pop_back();
                     Ax.print();
 
-                if (j.contains("new_password") && j.contains("confirm_new_password"))
-                {
-                    if(j["new_password"]==j["confirm_new_password"]){
-                    pswd = j["new_password"];
-                    dataframe A(0,2);
-                    A.insert("username");
-                    A.insert("password");
-                    A.insert(usr);
-                    A.insert(pswd);
-                    A.write_sqlite("server.db","users",std::vector<int>{1});
+                    if (j.contains("new_password") && j.contains("confirm_new_password"))
+                    {
+                        if (j["new_password"] == j["confirm_new_password"])
+                        {
+                            pswd = j["new_password"];
+                            dataframe A(0, 2);
+                            A.insert("username");
+                            A.insert("password");
+                            A.insert(usr);
+                            A.insert(pswd);
+                            A.write_sqlite("server.db", "users", std::vector<int>{1});
+                        }
+                        else
+                        {
+                            return "NOK";
+                        }
                     }
-                    else{return "NOK";}
-
-                }
 
                     return "VALID TICKET";
                 }
@@ -423,7 +431,7 @@ static std::string check_if_file(const std::string view)
     return ("empty");
 }
 
-static void parse_write_file(const std::string &body)
+static std::string parse_write_file(const std::string &body)
 {
 
     std::size_t found = body.find("\n");
@@ -466,10 +474,11 @@ static void parse_write_file(const std::string &body)
     // std::cout << pos1 << "  " << pos2 << std::endl;
     std::string new_body = std::string(body.begin() + pos1 + 1, body.begin() + pos2 - 2);
     // std::cout << new_body << std::endl;
-    filename = "downloads/" + filename;
-    std::ofstream stream(filename.c_str(), std::ios::binary);
+    auto tfilename = "downloads/" + filename;
+    std::ofstream stream(tfilename.c_str(), std::ios::binary);
     stream << new_body;
     stream.close();
+    return filename;
 }
 
 // Return a reasonable mime type based on the extension of a file.
@@ -623,7 +632,7 @@ void handle_request(
         return send(bad_request("Unknown HTTP-method"));
 
     auto auth_response = function.authentication(req);
-    //auth_response="OK";
+    // auth_response="OK";
     if (auth_response == "AUTHENTICATED" || auth_response == "VALID TICKET")
     {
         std::cout << auth_response << std::endl;
@@ -665,95 +674,113 @@ void handle_request(
     }
 
     // Respond to POST request
-
-    if (req.method() == http::verb::post)
+    try
     {
-
-        auto test = std::string(req.at(http::field::content_type));
-        std::string out_path;
-        auto cp = check_if_file(test);
-        if (cp != "empty")
-        { // std::cout<<check_if_file(test)<<std::endl;
-            parse_write_file(req.body());
-            return send(ok_response("Upload completed"));
-        }
-        else
+        if (req.method() == http::verb::post)
         {
-            out_path = function.post(req);
 
-            std::cout << out_path << std::endl;
+            auto test = std::string(req.at(http::field::content_type));
+            std::string out_path;
+            auto cp = check_if_file(test);
+            if (cp != "empty")
+            { // std::cout<<check_if_file(test)<<std::endl;
+                auto filename = parse_write_file(req.body());
+                //return(send(upload_func_standard(filename)))
+                //return send(ok_response("Upload completed"));
+                return send(ok_response("Upload "+filename+" Complete"));
+            }
+            else
+            {
+                out_path = function.post(req);
+
+                std::cout << out_path << std::endl;
+            }
+
+            out_path = path_cat(doc_root, out_path);
+            //  if (req.target().back() == '/')
+            //    path.append("index.html");
+            beast::error_code ecc;
+            http::file_body::value_type p_body;
+            p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
+
+            // Handle the case where the file doesn't exist
+            if (ecc == beast::errc::no_such_file_or_directory)
+                return send(not_found(out_path));
+
+            http::response<http::file_body> res{
+                std::piecewise_construct,
+                std::make_tuple(std::move(p_body)),
+                std::make_tuple(http::status::ok, req.version())};
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, mime_type(out_path));
+            // res.content_length(size);
+            res.keep_alive(req.keep_alive());
+            return send(std::move(res));
         }
 
-        out_path = path_cat(doc_root, out_path);
-        //  if (req.target().back() == '/')
-        //    path.append("index.html");
-        beast::error_code ecc;
-        http::file_body::value_type p_body;
-        p_body.open(out_path.c_str(), beast::file_mode::scan, ecc);
+        // Request path must be absolute and not contain "..".
+        if (req.target().empty() ||
+            req.target()[0] != '/' ||
+            req.target().find("..") != beast::string_view::npos)
+            return send(bad_request("Illegal request-target"));
 
+        // Build the path to the requested file
+        std::string path = path_cat(doc_root, req.target());
+        if (req.target().back() == '/')
+            path.append("index.html");
+
+        // Attempt to open the file
+        beast::error_code ec;
+        http::file_body::value_type body;
+        body.open(path.c_str(), beast::file_mode::scan, ec);
+        std::cout << path << std::endl;
         // Handle the case where the file doesn't exist
-        if (ecc == beast::errc::no_such_file_or_directory)
-            return send(not_found(out_path));
+        if (ec == beast::errc::no_such_file_or_directory)
+            return send(not_found(req.target()));
+        // Handle an unknown error
+        if (ec)
+            return send(server_error(ec.message()));
+        // Cache the size since we need it after the move
+        auto const size = body.size();
 
+        // Respond to HEAD request
+        if (req.method() == http::verb::head)
+        {
+            http::response<http::empty_body> res{http::status::ok, req.version()};
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            //  res.set(http::field::content_type, mime_type(path));
+            res.content_length(size);
+            res.keep_alive(req.keep_alive());
+            return send(std::move(res));
+        }
+
+        // Respond to GET request
         http::response<http::file_body> res{
             std::piecewise_construct,
-            std::make_tuple(std::move(p_body)),
+            std::make_tuple(std::move(body)),
             std::make_tuple(http::status::ok, req.version())};
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, mime_type(out_path));
-        // res.content_length(size);
-        res.keep_alive(req.keep_alive());
-        return send(std::move(res));
-    }
-
-    // Request path must be absolute and not contain "..".
-    if (req.target().empty() ||
-        req.target()[0] != '/' ||
-        req.target().find("..") != beast::string_view::npos)
-        return send(bad_request("Illegal request-target"));
-
-    // Build the path to the requested file
-    std::string path = path_cat(doc_root, req.target());
-    if (req.target().back() == '/')
-        path.append("index.html");
-
-    // Attempt to open the file
-    beast::error_code ec;
-    http::file_body::value_type body;
-    body.open(path.c_str(), beast::file_mode::scan, ec);
-    std::cout << path << std::endl;
-    // Handle the case where the file doesn't exist
-    if (ec == beast::errc::no_such_file_or_directory)
-        return send(not_found(req.target()));
-    // Handle an unknown error
-    if (ec)
-        return send(server_error(ec.message()));
-    // Cache the size since we need it after the move
-    auto const size = body.size();
-
-    // Respond to HEAD request
-    if (req.method() == http::verb::head)
-    {
-        http::response<http::empty_body> res{http::status::ok, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        //  res.set(http::field::content_type, mime_type(path));
+        res.set(http::field::content_type, mime_type(path));
         res.content_length(size);
         res.keep_alive(req.keep_alive());
         return send(std::move(res));
     }
+    catch (...)
+    {
+        auto const server_error =
+        [&req](beast::string_view what)
+    {
+        http::response<http::string_body> res{http::status::internal_server_error, req.version()};
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = "An error occurred: '" + std::string(what) + "'";
+        res.prepare_payload();
+        return res;
+    };
 
-    // Respond to GET request
-    http::response<http::file_body> res{
-        std::piecewise_construct,
-        std::make_tuple(std::move(body)),
-        std::make_tuple(http::status::ok, req.version())};
-    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.set(http::field::content_type, mime_type(path));
-    res.content_length(size);
-    res.keep_alive(req.keep_alive());
-    return send(std::move(res));
+    
+    }
 }
 
 // void httpserver_ssl(bundle func);
-
-
