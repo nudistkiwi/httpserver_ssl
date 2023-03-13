@@ -54,7 +54,7 @@ req.send_request("vtapi.floscodes.net","80");
 
 ### SET UP SERVER
 
-Assume you want to create hard-code this literal JSON value in a file, as a `json` object:
+Assume you want to create hard-code  value in a file,  object:
 
 ```cpp
 std::string callback(http::request<http::string_body>& A) {
