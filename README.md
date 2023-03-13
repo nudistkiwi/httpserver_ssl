@@ -2,21 +2,20 @@
 
 ## Design goals
 
-There are myriads of [JSON](https://json.org) libraries out there, and each may even have its reason to exist. Our class had these design goals:
+There are myriads oflibraries out there, and each may even have its reason to exist. Our class had these design goals:
 
-- **Intuitive syntax**. In languages such as Python, JSON feels like a first class data type. We used all the operator magic of modern C++ to achieve the same feeling in your code. Check out the [examples below](#examples) and you'll know what I mean.
+- **Intuitive syntax**. 
 
-- **Trivial integration**. Our whole code consists of a single header file [`json.hpp`](https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp). That's it. No library, no subproject, no dependencies, no complex build system. The class is written in vanilla C++11. All in all, everything should require no adjustment of your compiler flags or project settings.
+- **Trivial integration**. 
 
-- **Serious testing**. Our code is heavily [unit-tested](https://github.com/nlohmann/json/tree/develop/tests/src) and covers [100%](https://coveralls.io/r/nlohmann/json) of the code, including all exceptional behavior. Furthermore, we checked with [Valgrind](https://valgrind.org) and the [Clang Sanitizers](https://clang.llvm.org/docs/index.html) that there are no memory leaks. [Google OSS-Fuzz](https://github.com/google/oss-fuzz/tree/master/projects/json) additionally runs fuzz tests against all parsers 24/7, effectively executing billions of tests so far. To maintain high quality, the project is following the [Core Infrastructure Initiative (CII) best practices](https://bestpractices.coreinfrastructure.org/projects/289).
+- **Serious testing**. 
 
 ## Sponsors
 
-You can sponsor this library at [GitHub Sponsors](https://github.com/sponsors/nlohmann).
+
 
 ### :office: Corporate Sponsor
 
-[![](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Codacy-logo-black.svg/320px-Codacy-logo-black.svg.png)](https://github.com/codacy/About)
 
 ### :label: Named Sponsors
 
@@ -30,27 +29,28 @@ Here are some examples to give you an idea how to use the class.
 
 Beside the examples below, you may want to:
 
-→ Check the [documentation](https://json.nlohmann.me/)\
-→ Browse the [standalone example files](https://github.com/nlohmann/json/tree/develop/docs/examples)
+→ Check the
+→ Browse the
 
-Every API function (documented in the [API Documentation](https://json.nlohmann.me/api/basic_json/)) has a corresponding standalone example file. For example, the [`emplace()`](https://json.nlohmann.me/api/basic_json/emplace/) function has a matching [emplace.cpp](https://github.com/nlohmann/json/blob/develop/docs/examples/emplace.cpp) example file.
+### Make HTTP/S REQUESTS
 
-### Read JSON from a file
-
-The `json` class provides an API for manipulating a JSON value. To create a `json` object by reading a JSON file:
+The `https_client_request` class provides an API for manipulating a http requests.
 
 ```cpp
-#include <fstream>
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include <httpserver_ssl.h>
 
-// ...
+// Create a POST request on ssl port 443
+https_client_request req("POST", "/1/messages.json");
+req.send_request("vtapi.floscodes.net","443");
+//req.set_body(std::string A);
+req.set_body(json A);
 
-std::ifstream f("example.json");
-json data = json::parse(f);
+// ... Or Create an GET request port 80
+
+
 ```
 
-### Creating `json` objects from JSON literals
+### SET UP SERVER
 
 Assume you want to create hard-code this literal JSON value in a file, as a `json` object:
 
