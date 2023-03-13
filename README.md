@@ -41,9 +41,10 @@ The `https_client_request` class provides an API for manipulating a http request
 
 // Create a POST request on ssl port 443
 https_client_request req("POST", "/1/messages.json");
+req.set_body(json A);
 req.send_request("vtapi.floscodes.net","443");
 //req.set_body(std::string A);
-req.set_body(json A);
+
 
 // ... Or Create an GET request port 80
 
