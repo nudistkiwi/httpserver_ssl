@@ -56,36 +56,9 @@ req.send_request("vtapi.floscodes.net","80");
 
 Assume you want to create hard-code this literal JSON value in a file, as a `json` object:
 
-```json
-{
-  "pi": 3.141,
-  "happy": true
-}
-```
-
-There are various options:
-
 ```cpp
-// Using (raw) string literals and json::parse
-json ex1 = json::parse(R"(
-  {
-    "pi": 3.141,
-    "happy": true
-  }
-)");
-
-// Using user-defined (raw) string literals
-using namespace nlohmann::literals;
-json ex2 = R"(
-  {
-    "pi": 3.141,
-    "happy": true
-  }
-)"_json;
-
-// Using initializer lists
-json ex3 = {
-  {"happy", true},
-  {"pi", 3.141},
+std::string callback(http::request<http::string_body>& A) {
+    return("/success.json");
 };
+
 ```
