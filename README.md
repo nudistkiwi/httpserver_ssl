@@ -62,11 +62,11 @@ std::string callback(http::request<http::string_body>& A) {
     
     std::function<std::string(http::request<http::string_body>&)> func=callback;
     server_config funcs(func,"8080");
+    funcs.open_server=false; //true no authenication server no cookies
+    funcs.cookie_reset=3600; //in seconds
+    funcs.ports = "8080"; //port number
     httpserver_ssl(funcs);
-        bool open_server;
-    int cookie_reset;
-    time_t start_time;
-    char *ports = "8080";
+
 };
 
 ```
