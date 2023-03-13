@@ -59,6 +59,14 @@ Assume you want to create hard-code this literal JSON value in a file, as a `jso
 ```cpp
 std::string callback(http::request<http::string_body>& A) {
     return("/success.json");
+    
+    std::function<std::string(http::request<http::string_body>&)> func=callback;
+    server_config funcs(func,"8080");
+    httpserver_ssl(funcs);
+        bool open_server;
+    int cookie_reset;
+    time_t start_time;
+    char *ports = "8080";
 };
 
 ```
