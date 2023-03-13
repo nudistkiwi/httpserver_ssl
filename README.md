@@ -58,7 +58,7 @@ Assume you want to create hard-code  value in a file,  object:
 
 ```cpp
 std::string callback(http::request<http::string_body>& A) {
-    return("/success.json");
+    return("/success.json");};
     
     std::function<std::string(http::request<http::string_body>&)> func=callback;
     server_config funcs(func,"8080");
@@ -67,6 +67,6 @@ std::string callback(http::request<http::string_body>& A) {
     funcs.ports = "8080"; //port number
     httpserver_ssl(funcs);
 
-};
+
 
 ```
