@@ -47,7 +47,8 @@ req.set_body(json A);
 
 // ... Or Create an GET request port 80
 
-
+https_client_request req("GET", "/1/messages.json");
+req.send_request("vtapi.floscodes.net","80");
 ```
 
 ### SET UP SERVER
