@@ -88,6 +88,27 @@ return "Upload Complete";
 
 }
 
+
+static std::string randoms(int n) {
+
+    srand(time(0)); // seed the random number generator with the current time
+
+    std::string s;
+
+    for (int i = 0; i < n; i++) {
+
+        char c = 'a' + rand() % 52; // generate a random lowercase letter
+
+        s.push_back(c);
+
+    }
+
+    return s;
+
+}
+
+ 
+
 class bundle
 {
     std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> test;
@@ -103,12 +124,15 @@ public:
     int cookie_reset;
     time_t start_time;
     char *ports = "8080";
+    std::string configdb;
+    std::string cookie_base;
+    //multiplicator=100000000000000000000;
     std::vector<std::string> cookies = std::vector<std::string>{"FcY6roNeX1nYZiwjJoN3", "vsCmKwbAzXmydPRahVPH", "Wff7ok2VxIfy4Y8QHiPp", "3nMTIevLkOi7lahVSISR", "wFflv26AVYpI3BPkdwk7"};
     // std::vector<std::string> credentials = std::vector<std::string>{ "Username=ECUser&Password=GenerationECU","username=ECUser&password=GenerationECU" };
     // std::vector<std::string> token = std::vector<std::string>{ "FcY6roNeX1nYZiwjJoN3","vsCmKwbAzXmydPRahVPH","Wff7ok2VxIfy4Y8QHiPp","3nMTIevLkOi7lahVSISR","wFflv26AVYpI3BPkdwk7" };
     // std::vector<std::string> tickets = std::vector<std::string>{ "/ticket","/ticket","/ticket","/ticket","/ticket" };
 
-    std::vector<std::string> whitelisted_folders = std::vector<std::string>{"/vendors", "/build"};
+    //std::vector<std::string> whitelisted_folders = std::vector<std::string>{"/vendors", "/build"};
     // std::vector<std::string> whitelisted_files = std::vector<std::string>{"/static/css/main.41c4c83c.css",
     //    "/static/js/main.4b7a5d5f.js","/","/#/login","/login.html","/index.html","/static/js/9034.592b1093.chunk.js" };
     std::vector<std::string> blacklist = std::vector<std::string>{"/database.db", "/localhost.pem", "/localhost.decrypted.key"};
@@ -116,20 +140,26 @@ public:
 
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_)
     {
+        
         post_func = post_func_;
         set_server_config();
+        //cookie_base=std::to_string(rand()*multiplicator);
     };
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, char *ports_)
     {
+      
         post_func = post_func_;
         ports = ports_;
         set_server_config();
+        //cookie_base=std::to_string(rand()*multiplicator);
     };
     bundle(std::function<std::string(http::request<http::string_body> &)> post_func_, std::function<std::string(http::request<http::string_body> &)> get_func_)
     {
+        
         post_func = post_func_;
         get_func = get_func_;
         set_server_config();
+        //cookie_base=std::to_string(rand()*multiplicator);
     };
 
     void set_server_config()
@@ -137,25 +167,23 @@ public:
         //   sqlite3 *DB;
         // sqlite3_stmt *stmt = 0;
         // auto exit = sqlite3_open("server.db", &DB);
-        open_server = true;
+        open_server = false;
         cookie_reset = 3600;
         start_time = std::time(nullptr);
+        cookie_base=randoms(100);
         dataframe A(0, 1);
+        configdb="server.db";
+        blacklist.push_back("/"+configdb);
         A.insert("value");
-        A.insert("/bettercallsaul123");
-        A.insert("/bettercallsaul1234");
-        A.insert("/bettercallsaul12345");
-        A.insert("/bettercallsaul123456");
-        // A.write_sqlite(DB,stmt,"tickets");
         A.write_sqlite("server.db", "tickets");
 
         dataframe B(0, 2);
         B.insert("username");
         B.insert("password");
-        B.insert("userzero");
-        B.insert("abc314");
+        //B.insert("userzero");
+        //B.insert("abc314");
 
-        B.write_sqlite("server.db", "users", std::vector<int>{1});
+        B.write_sqlite(configdb, "users", std::vector<int>{1});
 
         dataframe C(0, 1);
         C.insert("file");
@@ -166,7 +194,9 @@ public:
         // C.insert("/");
         // C.insert("/index.html");
 
-        C.write_sqlite("server.db", "whitelisted", std::vector<int>{1});
+        C.write_sqlite(configdb, "whitelisted", std::vector<int>{1});
+
+
     }
 
     /*
@@ -196,7 +226,7 @@ public:
         int64_t elapsed = int64_t(time - start_time);
         auto roll = elapsed / cookie_reset;
         std::string pre = std::to_string(start_time + roll);
-
+        std::cout<<cookie_base<<"  ||  "<<pre<<std::endl;
         /*
         std::for_each(cookies.begin(),cookies.end(),
         //[](std::string& Ad){A=std::to_string(std::hash(Ad));}
@@ -206,16 +236,16 @@ public:
         );
     */
 
-        for (auto &iter : cookies)
-        {
+//       for (auto &iter : cookies)
+ //       {
 
             date = date.substr(0, 13);
             std::cout << date << " " << roll << " " << start_time << std::endl;
             // iter=date+iter;
 
             // iter = std::to_string(boost::hash_value(date + iter));
-            iter = std::to_string(boost::hash_value(pre + iter));
-        }
+            cookie_base = std::to_string(boost::hash_value(pre + cookie_base));
+    //    }
         //   return "OK";currentDateTime()+
 
         if (req.method() == http::verb::get)
@@ -231,7 +261,7 @@ public:
                 // auto exit = sqlite3_open("server.db", &DB);
                 Ax.insert("file");
                 Ax.insert(tar);
-                Ax.write_sqlite("server.db", "files", std::vector<int>{1});
+                //Ax.write_sqlite(configdb, "files", std::vector<int>{1});
             }
 
             for (auto it : blacklist)
@@ -251,20 +281,22 @@ public:
                 cookie = std::string(req["authorization"]);
             }
 
-            for (auto iter : cookies)
-            {
-                std::cout << cookie << " " << iter << std::endl;
+            //for (auto iter : cookies)
+            //{
+                std::cout << cookie << " " << cookie_base << std::endl;
                 // if (iter == cookie) return "OK";
-                if (cookie.find(iter) != std::string::npos)
+                if (cookie.find(cookie_base) != std::string::npos)
                     return "OK";
-            }
+            //}
 
-            for (auto iter : whitelisted_folders)
-            {
-                std::cout << iter << " " << req.target() << std::endl;
-                if (iter.size() <= tar.size() && tar.substr(0, iter.size()) == iter)
-                    return "OK";
-            }
+            //for (auto iter : whitelisted_folders)
+            //{
+            //    std::cout << iter << " " << req.target() << std::endl;
+            //    if (iter.size() <= tar.size() && tar.substr(0, iter.size()) == iter)
+             //       return "OK";
+           // }
+
+
 
             if (true)
             {
@@ -275,7 +307,7 @@ public:
                 sqlite3_stmt *stmt2 = 0;
                 dataframe Ax;
                 dataframe Bx;
-                auto exit = sqlite3_open("server.db", &DB2);
+                auto exit = sqlite3_open(configdb.c_str(), &DB2);
                 if (sqlite_check(DB2, stmt2, "whitelisted", std::vector<std::string>{"file"}, std::vector<std::string>{tar}))
                 {
                     return "OK";
@@ -286,7 +318,7 @@ public:
             sqlite3_stmt *stmt = 0;
             dataframe Ax;
             dataframe Bx;
-            auto exit = sqlite3_open("server.db", &DB);
+            auto exit = sqlite3_open(configdb.c_str(), &DB);
             /*
             Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
 
@@ -321,13 +353,13 @@ public:
                 cookie = std::string(req["authorization"]);
             }
 
-            for (auto iter : cookies)
-            {
-                std::cout << cookie << " " << iter << std::endl;
+            //for (auto iter : cookies)
+            //{
+                std::cout << cookie << " " << cookie_base << std::endl;
                 // if (iter == cookie) return "OK";
-                if (cookie.find(iter) != std::string::npos)
+                if (cookie.find(cookie_base) != std::string::npos)
                     return "OK";
-            }
+            //}
 
             /*
                         for (auto iter : credentials) {
@@ -374,7 +406,7 @@ public:
                 sqlite3_stmt *stmt = 0;
                 dataframe Ax;
                 dataframe Bx;
-                auto exit = sqlite3_open("server.db", &DB);
+                auto exit = sqlite3_open(configdb.c_str(), &DB);
                 // Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
                 // Bx.print();
                 std::cout << "SELECT username FROM users WHERE user='" + usr + "' AND password='" + pswd + "';" << std::endl;
@@ -396,7 +428,7 @@ public:
                             A.insert("password");
                             A.insert(usr);
                             A.insert(pswd);
-                            A.write_sqlite("server.db", "users", std::vector<int>{1});
+                            A.write_sqlite(configdb.c_str(), "users", std::vector<int>{1});
                         }
                         else
                         {
@@ -647,7 +679,7 @@ void handle_request(
             return send(std::move(res));
           */
         dataframe msg;
-        std::string cookie = function.cookies[0];
+        std::string cookie = function.cookie_base;
         msg.insert(std::vector<std::string>{"token", cookie});
         msg.insert(std::vector<std::string>{"redirect", "index.html"});
 
