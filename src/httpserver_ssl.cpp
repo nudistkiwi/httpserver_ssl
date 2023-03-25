@@ -96,7 +96,7 @@ class session : public std::enable_shared_from_this<session>
     http::request<http::string_body> req_;
     std::shared_ptr<void> res_;
     send_lambda lambda_;
-    bundle function_;
+    server_configuration function_;
     boost::optional<http::request_parser<http::string_body>> parser_;
     //   template <typename func>
      //  func function_;    
@@ -278,7 +278,7 @@ class listener : public std::enable_shared_from_this<listener>
     ssl::context& ctx_;
     tcp::acceptor acceptor_;
     std::shared_ptr<std::string const> doc_root_;
-    bundle function_;
+    server_configuration function_;
 
 public:
     template <class call>
@@ -378,7 +378,7 @@ private:
 
 
 
-void httpserver_ssl(bundle func) {
+void httpserver_ssl(server_configuration func) {
 
     char* ipaddress = "0.0.0.0";
     char* ports = "8080";

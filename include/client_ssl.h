@@ -43,7 +43,7 @@ static std::string mime_types(std::string path)
 
 class https_client_request {
 
-
+public:
     std::string const host;
     std::string const port;
     std::string const target;
@@ -62,7 +62,7 @@ class https_client_request {
 
     http::request<http::string_body> req;
 
-public:
+
 
 
 
@@ -163,8 +163,15 @@ public:
 
     std::string get_ip() { return stream.lowest_layer().remote_endpoint().address().to_string(); };
 
-    template <class T > void set_body(T A) { req.body() = A.dump(); };
-    void set_body(std::string A) { req.body() = A; };
+    template <class T > void set_body(T A) { req.body() = A.dump();
+    req.set(http::field::content_type,"application/json");
+    auto const size = req.body().size();
+    req.set(http::field::content_length,std::to_string(size));
+    
+     };
+    void set_body(std::string A) { req.body() = A; 
+    
+    };
     std::string response_body() { return(std::string(res.body())); };
 
 

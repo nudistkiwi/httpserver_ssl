@@ -9,4 +9,4 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;   
 */
 
-void httpserver_ssl(bundle func);
+void httpserver_ssl(server_configuration func);

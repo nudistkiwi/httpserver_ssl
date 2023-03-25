@@ -25,7 +25,46 @@ std::cout<<"8...search for element:"<<std::endl;
 std::cout<<"11...clipboard search:"<<std::endl;
 */
 
-std::string callback(http::request<http::string_body>& A) {
+struct keymanager{
+std::string passcode="skfhdfd";
+std::string vaultname="database.db";
+
+};
+
+
+std::string callback(http::request<http::string_body>& A,void* B) {
+
+keyvault* hallo = (keyvault*) B;
+//std::cout<<hallo->passcode<<std::endl;
+//https_client_request req2("GET", "/v1/models");
+//req2.send_request("api.openai.com", "443");
+hallo->data();
+std::string token=hallo->operator()("OpenAI");
+https_client_request req2("POST", "/v1/chat/completions");
+req2.req.set(http::field::authorization,token);
+//req2.req.set(http::field::content_type,"application/json");
+//req2.req.set(http::field::content_length,"109");
+json JS;
+json JS2;
+JS2["role"]="user";
+JS2["content"]="Whats the newest Movie you know in your Training Data?";
+std::vector<json> Ax;
+Ax.push_back(JS2);
+
+    JS["model"] = "gpt-3.5-turbo";
+    JS["messages"] = Ax;
+    JS["temperature"] = 0.7;
+    req2.set_body(JS);
+
+
+//req2.req.body()="{\"messages\": [{\"role\": \"user\", \"content\": \"Say this is a test!\"}],\"model\":\"gpt-3.5-turbo\", \"temperature\": 0.7}";
+//req2.req.set(http::field::content_length,"109");
+std::cout<<req2.req<<std::endl;
+req2.send_request("api.openai.com", "443");
+//req2.req.set(http::)
+//req2.req.set(http::field::au
+
+std::cout<<req2.res.body()<<std::endl;
 
 /*
     std::cout << "POST REQUEST  " << A << std::endl;
@@ -46,6 +85,7 @@ std::string callback(http::request<http::string_body>& A) {
     req2.send_request("api.pushover.net", "443");
 
 */
+    std::cout<<"CCAALLBACK"<<std::endl;
     return("/success.json");
 };
 
@@ -53,6 +93,7 @@ std::string callback(http::request<http::string_body>& A) {
 int main(//int argc, char* argv[]
 )
 {
+    //   OpenSSL_add_all_algorithms();
     // Check command line arguments.
     /*
     if (argc != 5)
@@ -99,9 +140,49 @@ int main(//int argc, char* argv[]
 */
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
-    std::function<std::string(http::request<http::string_body>&)> func=callback;
-    bundle funcs(func,"8080");
+
+ //OpenSSL_add_all_algorithms();
+    keyvault *adsd =new keyvault; ;
+    //std::shared_ptr<keymanager> hs;
+    std::function<std::string(http::request<http::string_body>&,void*)> func=callback;
+    server_configuration funcs(func,"8080");
+    
+
+
+
+    //std::string ciphertext = "T0TsiTwtKeNjYgiM7x1yWkQv4bGFL4gPPaJ6pnZU6H0=";
+    //std::string key = "my_secret_key_1234";
+std::string as;
+
+std::cout<<"Password:"<<std::endl;
+std::cin>>as;
+
+  //test.write_sqlite("server.db","userzero",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
+  
+//  keyvault first;
+//  first.insert("admin",as);
+ keyvault vault("server.db","admin",as); 
+ //vault.insert_new("userzero","qwertzuiop"); 
+ vault.data();
+
+  //vault.insert_new("userzero","asdfghjkl"); 
+ //std::cout<<vault("userzero")<<std::endl;
+  //std::cout<<vault("hello")<<std::endl;
+    
+    funcs.trezor=vault;
+    funcs.obj=&funcs.trezor;
+
+    //query.print();
+    //std::string ass=query(2,2);
+
+    //std::cout<<query(2,2)<<std::endl;
+    //if(query(2,2)==as) std::cout<<"ALL GOOD"<<std::endl;
+    //else std::cout<<"WTF"<<std::endl;
+   
+    //keymanager* test=hs;
     httpserver_ssl(funcs);
+    //std::cout<<"sdfksdgfjhsdfgjdsfhgsd"<<std::endl;
+    //std::cin>>as;
    /*
     char *ipaddress="127.0.0.1";
     char *ports="9090";
