@@ -44,13 +44,17 @@ class session : public std::enable_shared_from_this<session>
             // The lifetime of the message has to extend
             // for the duration of the async operation so
             // we use a shared_ptr to manage it.
+
             auto sp = std::make_shared<
                 http::message<isRequest, Body, Fields>>(std::move(msg));
-
+            
+            //auto sp = std::make_shared<
+            //http::message<isRequest, Body, Fields>>(std::move(test));
+            //std::cout<<"jhsgfjhsfdffdfgfjhfsdgsfjhfsg"<<std::endl;
             // Store a type-erased version of the shared
             // pointer in the class to keep it alive.
             self_.res_ = sp;
-
+        
             // Write the response
             http::async_write(
                 self_.stream_,
@@ -59,7 +63,9 @@ class session : public std::enable_shared_from_this<session>
                     &session::on_write,
                     self_.shared_from_this(),
                     sp->need_eof()));
+              
         }
+        
     };
 
     beast::tcp_stream stream_;
@@ -87,6 +93,7 @@ public:
     {
     }
 
+    
     // Start the asynchronous operation
     //template <typename call>
     void
@@ -97,6 +104,7 @@ public:
         // for single-threaded contexts, this example code is written to be
         // thread-safe by default.
        //std::cout<<function_(std::vector<std::string>{"Test2"})<<std::endl;
+       
         net::dispatch(stream_.get_executor(),
                       beast::bind_front_handler(
                           &session::do_read,
@@ -155,20 +163,11 @@ public:
 
         // Send the response
         
-       // handle_request(*doc_root_, std::move(req_), lambda_,[](std::vector<std::string>){return(std::string("<!DOCTYPE html><html><body><h1>My Callback</h1><p>My first callback.</p></body></html>"));});
-     //handle_request(*doc_root_, std::move(req_), lambda_,function_);
+
     std::cout<<stream_.socket().lowest_layer().remote_endpoint().address().to_string()<<std::endl;
     std::string ip=stream_.socket().lowest_layer().remote_endpoint().address().to_string();
-    dataframe logs(0,3);
-    logs.insert(std::vector<std::string>{"IP_ADRESS"});
-    logs.insert(std::vector<std::string>{ip});
-    logs.add_timestamp("TIMESTAMP");
-    sqlite3_stmt *stmt = 0;
-    sqlite3 *DB;
-    auto exit = sqlite3_open("logs.db", &DB);
-    logs.write_sqlite(DB,stmt,"Logs");
-     handle_request(*doc_root_, parser_->release(), lambda_,function_);
-   
+    std::string optional;
+     handle_request(*doc_root_, parser_->release(), lambda_,function_,optional);
     
     }
 
@@ -179,6 +178,12 @@ public:
         std::size_t bytes_transferred)
     {
         boost::ignore_unused(bytes_transferred);
+if (ec) {
+     std::cout << "Error: " << ec.message() << std::endl;
+        } 
+        else {
+        std::cout << "Bytes transferred: " << bytes_transferred << std::endl;
+        }
 
         if(ec)
             return fail(ec, "write");
@@ -187,23 +192,44 @@ public:
         {
             // This means we should close the connection, usually because
             // the response indicated the "Connection: close" semantic.
+        std::cout<<"DO_Close CALL"<<std::endl;
             return do_close();
         }
 
         // We're done with the response so delete it
         res_ = nullptr;
-
+        
         // Read another request
         do_read();
+        //do_close();
     }
+/*
+void
+    on_sse(
+      
+        beast::error_code ec,
+        std::size_t bytes_transferred)
+    {
+        boost::ignore_unused(bytes_transferred);
+if (ec) {
+     std::cout << "Error: " << ec.message() << std::endl;
+        } 
+        else {
+        std::cout << "Bytes transferred: " << bytes_transferred << std::endl;
+        }
 
+        if(ec)
+            return fail(ec, "write");
+
+    }
+*/
     void
     do_close()
     {
         // Send a TCP shutdown
         beast::error_code ec;
         stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
-
+        std::cout<<"SOCKET CLOSED"<<std::endl;
         // At this point the connection is closed gracefully
     }
 };
@@ -310,12 +336,10 @@ private:
 };
 
 
-
-
-void read_input(net::io_context& ioc,server_configuration & conf){
+static void read_input(net::io_context& ioc,server_configuration & conf){
 
 std::string line;
-std::cout<<"Next:"<<std::endl;
+std::cout<<"Next: Type INSERT to add User"<<std::endl;
 while(std::getline(std::cin,line))
 {
     //if(conf.trezor(line)!=""){
@@ -333,18 +357,65 @@ if(line=="INSERT"){
     conf.trezor.insert_new(x,line);
     std::cout<<"SUCCESSFULL!!"<<std::endl;
 }
-//std::cout<<"Next:"<<std::endl;
 
+
+//std::cout<<hallo->passcode<<std::endl;
+//https_client_request req2("GET", "/v1/models");
+if(line=="CHATGPT"){
+    std::cout<<"Welcome to GPT3.5-Turbo"<<std::endl;
+    std::vector<json> memory;
+
+
+while(std::getline(std::cin,line) && line!="RESET")
+{
+
+std::string token=conf.trezor("OpenAI");
+https_client_request req2("POST", "/v1/chat/completions");
+req2.req.set(http::field::authorization,token);
+//req2.req.set(http::field::content_type,"application/json");
+//req2.req.set(http::field::content_length,"109");
+json JS;
+json JS2;
+JS2["role"]="user";
+//JS2["content"]="Whats the newest Movie you know in your Training Data?";
+JS2["content"]=line;
+//std::vector<json> Ax;
+memory.push_back(JS2);
+
+    JS["model"] = "gpt-3.5-turbo";
+    JS["messages"] = memory;
+    //JS["max_tokens"] = 60;
+    JS["temperature"] = 0.7;
+    req2.set_body(JS);
+
+
+//req2.req.body()="{\"messages\": [{\"role\": \"user\", \"content\": \"Say this is a test!\"}],\"model\":\"gpt-3.5-turbo\", \"temperature\": 0.7}";
+//req2.req.set(http::field::content_length,"109");
+//std::cout<<req2.req<<std::endl;
+req2.send_request("api.openai.com", "443");
+//req2.req.set(http::)
+//req2.req.set(http::field::au
+
+
+json response =json::parse(req2.res.body());
+std::string message=response["choices"][0]["message"]["content"].dump();
+//std::cout<<response["choices"][0]["message"]["content"].dump()<<std::endl;
+//std::cout<<"Next:"<<std::endl;
+//std::string rep="infinte God, you piece of shit";
+//std::string re="AI language model";
+
+//message.replace(message.find(re),re.size(),rep);
+dataframe o(0,1);
+o.insert(response.dump());
+o.write_csv("ai.json");
+std::cout<<message<<std::endl;
+memory.push_back(response["choices"][0]["message"]);
+}
+}
 }
 
 ioc.stop();
 }
-
-
-
-
-
-
 
 
 //void start_http_server(std::function<std::string(std::vector<std::string> )> func){

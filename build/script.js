@@ -12,7 +12,7 @@ btnLogin.addEventListener("click", function(e) {
 
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "", true);
-  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.setRequestHeader("Content-Type", "text/event-stream");
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4 && xhr.status === 200) {
       var data = JSON.parse(xhr.responseText);

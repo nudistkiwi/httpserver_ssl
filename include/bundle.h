@@ -8,6 +8,7 @@
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/beast/ssl.hpp>
+#include <boost/asio/read_until.hpp>
 // #include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -30,326 +31,11 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/err.h>
+#include <keyvault.h>
+#include <server_config.h>
 
 
 
-// Define the encryption function
-
-static std::string encrypt_symmetric(const std::string& plaintext, const std::string& key) {
-
-    // Set up the encryption context
-
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-
-    EVP_CIPHER_CTX_init(ctx);
-
-    EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, (const unsigned char*)key.c_str(), nullptr);
-
- 
-
-    // Generate a random IV
-
-    unsigned char iv[EVP_MAX_IV_LENGTH];
-
-    RAND_bytes(iv, EVP_MAX_IV_LENGTH);
-
-    EVP_EncryptInit_ex(ctx, nullptr, nullptr, nullptr, iv);
-
- 
-
-    // Encrypt the plaintext
-
-    int out_len = plaintext.size() + EVP_MAX_BLOCK_LENGTH;
-
-    unsigned char* ciphertext = new unsigned char[out_len];
-
-    EVP_EncryptUpdate(ctx, ciphertext, &out_len, (const unsigned char*)plaintext.c_str(), plaintext.size());
-
- 
-
-    // Finalize the encryption and append the IV to the ciphertext
-
-    int final_len;
-
-    EVP_EncryptFinal_ex(ctx, ciphertext + out_len, &final_len);
-
-    out_len += final_len;
-
-    std::string result((const char*)iv, EVP_MAX_IV_LENGTH);
-
-    result += std::string((const char*)ciphertext, out_len);
-
-
-    // Write the result to the output file 
-
-    // Clean up
-
-    delete[] ciphertext;
-
-    EVP_CIPHER_CTX_free(ctx);
-
-return  result;
-}
-
- 
-
-// Define the decryption function
-
-static std::string decrypt_symmetric(const std::string& input_file, const std::string& key) {
-
-std::stringstream input(input_file);
-    std::vector<unsigned char> ciphertext_vec((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-
-    std::string ciphertext((const char*)ciphertext_vec.data(), ciphertext_vec.size());
-
-// std::string ciphertext(input_file);
-
-    // Extract the IV from the ciphertext
-
-    unsigned char iv[EVP_MAX_IV_LENGTH];
-
-    std::string ciphertext_without_iv = ciphertext.substr(EVP_MAX_IV_LENGTH);
-
-
-    std::string iv_str = ciphertext.substr(0, EVP_MAX_IV_LENGTH);
-  
-
-
-    memcpy(iv, iv_str.c_str(), EVP_MAX_IV_LENGTH);
-
- 
-
-    // Set up the decryption context
-
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-
-    EVP_CIPHER_CTX_init(ctx);
-
-    EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, (const unsigned char*)key.c_str(), nullptr);
-    EVP_DecryptInit_ex(ctx, nullptr, nullptr, nullptr, iv);
-
-    // handle error
-
-    // Decrypt the ciphertext
-
-    int out_len = ciphertext_without_iv.size() + EVP_MAX_BLOCK_LENGTH;
-  //  std::cout<<out_len<<std::endl;
-    unsigned char* plaintext = new unsigned char[out_len];
-
-    //for(int i=0;i<out_len;i++) plaintext[i]='0';
- //  std::cout<<iv_str<<std::endl;
-//std::cout<<iv<<std::endl; 
-//std::cout<<ciphertext_without_iv<<"  "<<ciphertext_without_iv.size()<<std::endl; 
-//std::cout<<"First "<<plaintext<<" "<<out_len<<std::endl; 
-//std::cout<<ctx<<std::endl;
- EVP_DecryptUpdate(ctx, plaintext, &out_len, (const unsigned char*)ciphertext_without_iv.c_str(), ciphertext_without_iv.size());
-
-    // handle error
-
-
- //std::cout<<plaintext<<"  "<<out_len<<std::endl; 
- 
-
-    // Finalize the decryption
-
-    int final_len=0;
-
-    if(EVP_DecryptFinal_ex(ctx, plaintext + out_len, &final_len)!=1){
-        //std::cout<<ERR_error_string()<<std::endl;
-    unsigned long err = ERR_get_error();
-char err_buf[256];
-ERR_error_string(err, err_buf);
-std::cout<<err_buf<<std::endl;    
-    }
- //std::cout<<plaintext<<"  "<<final_len<< std::endl; 
-
-out_len += final_len;
-
-std::string result((const char*)plaintext, out_len);
-
-// Clean up
-
-delete[] plaintext;
-
-EVP_CIPHER_CTX_free(ctx);
-
- 
-
-return result;
-
-}
-
-
-class keyvault {
-
-public:
-
-
-
-
-
-keyvault(){flag=false;
-
-
-//std::cout << decrypted << std::endl; // output: "hello world"
-};
-
-keyvault(std::string database,std::string accounts,std::string pass){
-
-dataframe X(0,2);
-X.insert(accounts);
-//X.insert(pass);
-X.search_sqlite(database,accounts,std::vector<std::string>{"account"},std::vector<std::string>{"account","token"});
-std::string keys=pass;
-
-if(X.rows>1){
-const std::string val=X(2,2);
-try{ 
-auto passed=decrypt(val,keys);
-if(passed==pass){
-passcode=pass;
-account=accounts;
-vault=database;
-flag=true;
-std::cout<<"authenicated...."<<std::endl;
-}
-else{ flag=false;
-    std::cout<<"failed...."<<std::endl;}
-}
-
-catch(...){
-    flag=false;
-    std::cout<<"failed...."<<std::endl;
-}
-}
-else{
-    flag=false;
-    std::cout<<"failed...."<<std::endl;
-}
-}; 
-
-std::string key(const std::string &pass){
-auto temp=pass;
-while(temp.size()<32) temp+=pass;
-while(temp.size()>32) temp.pop_back();
-return temp;
-};
-
-std::string encrypt(const std::string& text,const std::string& pass) {
-    auto keys=key(pass);
-    return encrypt_symmetric(text, keys);
-}
-
-std::string decrypt(const std::string encrypted_text,const std::string pass) {
-auto keys=key(pass);
-    return decrypt_symmetric(encrypted_text, keys); // decrypt the ciphertext using the symmetric encryption algorithm and the IV
-
-}
-
-
-void insert(std::string service, std::string token){
-dataframe X(0,2);
-X.insert(std::vector<std::string>{"account","token"});
-
-//auto keys=key(token);
-std::string x=token;
-x=encrypt(token,token);
-//std::cout<<"test  "<<decrypt(x,token)<<std::endl;
-X.insert(std::vector<std::string>{service,x});
-X.write_sqlite(vault,service,std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
-};
-
-std::string operator()(std::string service){
-    try{
-    if(flag)
-    {
-        dataframe X(0,1);
-        X.insert(service);
-        X.search_sqlite(vault,account,std::vector<std::string>{"account"},std::vector<std::string>{"account","token"});
-  //      X.print();
-        if(X.rows>1){
-            const std::string as=X(2,2);
-        return decrypt(as,passcode);
-        }
-        else{ return "";}
-    }
-    else{ return "";}
-    }
-    catch(...){return "";}
-};
-
-void set_vault(std::string a){vault=a;}
-void data(){
-std::cout<<passcode<<std::endl;
-std::cout<<vault<<std::endl;
-std::cout<<account<<std::endl;
-std::cout<<flag<<std::endl;
-
-
-
-
-};
-
-void insert_new(std::string service,std::string token){
-
-if(flag){
-dataframe X(0,2);
-X.insert(std::vector<std::string>{"account","token"});
-//auto keys=key(token);
-token=encrypt(token,passcode);
-X.insert(std::vector<std::string>{service,token});
-//X.print();
-X.write_sqlite(vault,account,std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
-}
-
-}
-
-private:
-bool flag;
-std::string passcode;
-std::string account;
-std::string vault;
-
-
-};
-
-
-/*
-static bool sqlite_check(sqlite3 *DB, sqlite3_stmt *stmt, std::string tablename, std::vector<std::string> cols, std::vector<std::string> val)
-{
-
-    std::cout << "INTRO" << std::endl;
-    if (cols.size() > 0 && cols.size() == val.size())
-    {
-        std::string query = "SELECT ";
-        for (auto &it : cols)
-        {
-            query = query + "\"" + it + "\"" + ",";
-        }
-        query.pop_back();
-        query = query + " FROM \"" + tablename + "\" WHERE ";
-        std::string sub_str;
-        for (int i = 0; i < cols.size(); i++)
-        {
-            sub_str = " \"" + cols[i] + "\"='" + val[i] + "' AND";
-            query = query + sub_str;
-        }
-        query.pop_back();
-        query.pop_back();
-        query.back() = ';';
-        dataframe Ax;
-        std::cout << query << std::endl;
-        Ax.search_sqlite(DB, stmt, query);
-
-        if (Ax.rows > 0)
-        {
-            return (true);
-        }
-    }
-
-    return (false);
-}
-*/
 namespace beast = boost::beast;   // from <boost/beast.hpp>
 namespace http = beast::http;     // from <boost/beast/http.hpp>
 namespace net = boost::asio;      // from <boost/asio.hpp>
@@ -357,332 +43,6 @@ using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 using json = nlohmann::json;
 // using request_body_t = boost::beast::http::string_body;
 
-static const std::string currentDateTime()
-{
-    time_t now = time(0);
-    struct tm tstruct;
-    char buf[80];
-    tstruct = *localtime(&now);
-    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-    // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-
-    return buf;
-}
-
-static std::string upload_func_standard(std::string)
-{
-
-    return "Upload Complete";
-}
-
-static std::string randoms(int n)
-{
-
-    srand(time(0)); // seed the random number generator with the current time
-
-    std::string s;
-
-    for (int i = 0; i < n; i++)
-    {
-
-        char c = 'a' + rand() % 52; // generate a random lowercase letter
-
-        s.push_back(c);
-    }
-
-    return s;
-}
-//template <typename T = void>
-
-
-
-
-
-
-
-
-
-
-class server_configuration
-{
-    std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> test;
-    std::function<std::string(http::request<http::string_body> &,void*)> post_func;
-    std::function<std::string(http::request<http::string_body> &,void*)> rpost_func;
-    //std::function<std::string(http::request<http::string_body> &)> post_func1;
-    std::function<std::string(http::request<http::string_body> &)> get_func;
-    std::function<std::string(http::request<http::string_body> &)> auth_func;
-    std::function<std::string(std::string)> upload_func = upload_func_standard;
-
-    // std::vector<std::string> credentials = std::vector<std::string>{ "username=ECUser&password= };
-
-public:
-    bool open_server;
-    int cookie_reset;
-    time_t start_time;
-    char *ports = "8080";
-    std::string configdb;
-    std::string cookie_base;
-    std::string passkey;
-    keyvault trezor;
-    void * obj;
-    // multiplicator=100000000000000000000;
-    std::vector<std::string> cookies = std::vector<std::string>{"FcY6roNeX1nYZiwjJoN3", "vsCmKwbAzXmydPRahVPH", "Wff7ok2VxIfy4Y8QHiPp", "3nMTIevLkOi7lahVSISR", "wFflv26AVYpI3BPkdwk7"};
-    std::vector<std::string> blacklist = std::vector<std::string>{"/database.db", "/localhost.pem", "/localhost.decrypted.key"};
-   
-    std::string get_key(std::string val){
-        dataframe table;
-       // table.search_sqlite(configdb,)
-
-
-    };
-
-    template <class G>
-    server_configuration(std::function<std::string(http::request<http::string_body> &,G& X)> post_func_)
-    {
-
-        //post_func = post_func_;
-        set_server_config();
-        // cookie_base=std::to_string(rand()*multiplicator);
-    };
-
-
-    server_configuration(std::function<std::string(http::request<http::string_body> &,void*)> post_func_)
-    {
-
-        post_func = post_func_;
-        set_server_config();
-        // cookie_base=std::to_string(rand()*multiplicator);
-    };
-
-
-    server_configuration(std::function<std::string(http::request<http::string_body> &,void*)> post_func_, char *ports_)
-    {
-
-        post_func = post_func_;
-        ports = ports_;
-        set_server_config();
-        // cookie_base=std::to_string(rand()*multiplicator);
-    };
-    server_configuration(std::function<std::string(http::request<http::string_body> &,void*)> post_func_, std::function<std::string(http::request<http::string_body> &)> get_func_)
-    {
-
-        post_func = post_func_;
-        get_func = get_func_;
-        set_server_config();
-        // cookie_base=std::to_string(rand()*multiplicator);
-    };
-
-    void set_server_config()
-    {
-        //   sqlite3 *DB;
-        // sqlite3_stmt *stmt = 0;
-        // auto exit = sqlite3_open("server.db", &DB);
-        open_server = false;
-        cookie_reset = 3600;
-        start_time = std::time(nullptr);
-        cookie_base = randoms(100);
-        dataframe A(0, 1);
-        configdb = "server.db";
-        blacklist.push_back("/" + configdb);
-        A.insert("value");
-        A.write_sqlite("server.db", "tickets");
-
-
-        dataframe C(0, 1);
-        C.insert("file");
-
-        C.insert("/style.css");
-        C.insert("/login.html");
-        C.insert("/script.js");
-
-
-        C.write_sqlite(configdb, "whitelisted", std::vector<int>{1});
-    }
-
-    std::string post(http::request<http::string_body> &A,void* x) { return (post_func(A,x)); };
-    std::string get(http::request<http::string_body> &A) { return (get_func(A)); };
-
-    void set_test(std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> X) { test = X; };
-    // std::string auth(http::request<http::string_body>& req, http::response<http::string_body>& res) {
-    // req.at(http::basic_fields::authorize);
-
-    std::string authentication(http::request<http::string_body> &req)
-    {
-
-        if (open_server)
-            return "OK";
-
-        auto date = currentDateTime();
-        time_t time = std::time(nullptr);
-        int64_t elapsed = int64_t(time - start_time);
-        auto roll = elapsed / cookie_reset;
-        std::string pre = std::to_string(start_time + roll);
-        std::cout << cookie_base << "  ||  " << pre << std::endl;
-
-
- 
-
-        date = date.substr(0, 13);
-        std::cout << date << " " << roll << " " << start_time << std::endl;
-        // iter=date+iter;
-
-        // iter = std::to_string(boost::hash_value(date + iter));
-        cookie_base = std::to_string(boost::hash_value(pre + cookie_base));
-        //    }
-        //   return "OK";currentDateTime()+
-
-        if (req.method() == http::verb::get)
-        {
-
-            std::string tar(req.target());
-            if (true)
-            {
-                // sqlite3 *DB;
-                // sqlite3_stmt *stmt = 0;
-                dataframe Ax(0, 1);
-                dataframe Bx;
-                // auto exit = sqlite3_open("server.db", &DB);
-                Ax.insert("file");
-                Ax.insert(tar);
-                // Ax.write_sqlite(configdb, "files", std::vector<int>{1});
-            }
-
-            for (auto it : blacklist)
-            {
-                if (it == tar)
-                    return "NOK";
-            }
-
-
-
-            std::string cookie(req["cookie"]);
-            if (cookie == "")
-            {
-                cookie = std::string(req["authorization"]);
-            }
-
-            // for (auto iter : cookies)
-            //{
-            std::cout << cookie << " " << cookie_base << std::endl;
-            // if (iter == cookie) return "OK";
-            if (cookie.find(cookie_base) != std::string::npos)
-                return "OK";
-
-
-            if (true)
-            {
-
-                sqlite3 *DB2;
-                sqlite3_stmt *stmt2 = 0;
-                dataframe Ax;
-                dataframe Bx;
-                auto exit = sqlite3_open(configdb.c_str(), &DB2);
-                dataframe check(0,1);
-                check.insert(tar);
-                check.search_sqlite(configdb,"whitelisted",std::vector<std::string>{"file"},std::vector<std::string>{"file"});
-                if (check.rows>1)
-                {
-                    return "OK";
-                }
-            }
-
-                  dataframe check(0,1);
-                  check.insert(tar);
-                  check.search_sqlite(configdb,"tickets",std::vector<std::string>{"value"},std::vector<std::string>{"value"});
-            if (check.rows>1)
-            {
-            sqlite3 *DB;
-            sqlite3_stmt *stmt = 0;
-            auto exit = sqlite3_open(configdb.c_str(), &DB);
-                check.statement(DB, "DELETE FROM tickets WHERE value='" + tar + "';");
-
-                // std::cout<<tickets.size()<<" Available Tickets"<<std::endl;
-                return "VALID TICKET";
-            }
-            else
-            {
-            }
-
-            return "NOK";
-        }
-        if (req.method() == http::verb::post)
-        {
-
-            std::string cookie(req["cookie"]);
-            if (cookie == "")
-            {
-                cookie = std::string(req["authorization"]);
-            }
-
-
-            std::cout << cookie << " " << cookie_base << std::endl;
-
-            if (cookie.find(cookie_base) != std::string::npos)
-                return "OK";
-
-            if (json::accept(req.body()))
-            {
-                std::cout << "SELECT username FRO" << std::endl;
-                std::cout << req.body() << std::endl;
-                json j = json::parse(req.body());
-                std::string pswd;
-                std::string usr;
-                if (j.contains("token"))
-                {
-                    pswd = j["token"];
-                }
-                if (j.contains("password"))
-                {
-                    pswd = j["password"];
-                }
-                if (j.contains("username"))
-                {
-                    usr = j["username"];
-                }
-                
-            
-                    std::cout<<trezor(usr)<<" "<<pswd<<" "<<usr<<std::endl;
-            
-
-                if(trezor(usr)==pswd && pswd!=""){
-                
-                    std::cout<<trezor(usr)<<" "<<pswd<<" "<<usr<<std::endl;
-
-
-                    if (j.contains("new_password") && j.contains("confirm_new_password"))
-                    {
-                        std::cout<<"NEW"<<std::endl;
-                        if (j["new_password"] == j["confirm_new_password"])
-                        {
-                             std::cout<<"NEW NEEEWW"<<std::endl;
-                            pswd = j["new_password"];
-                            trezor.insert_new(usr,pswd);
-                            std::cout<<usr<<"  "<<pswd<<std::endl;
-                            std::cout<<trezor(usr)<<std::endl;
-                            //dataframe A(0, 2);
-                            //A.insert("username");
-                            //A.insert("password");
-                            //A.insert(usr);
-                            //A.insert(pswd);
-                            //A.write_sqlite(configdb.c_str(), "users", std::vector<int>{1});
-
-                        }
-                        else
-                        {
-                            return "NOK";
-                        }
-                    }
-                return "VALID TICKET";   
-                }
-                else {return "NOK";}
-                
-            }
-
-            return "NOK";
-        }
-    };
-};
 
 static std::string check_if_file(const std::string view)
 {
@@ -843,7 +203,7 @@ template <
 void handle_request(
     beast::string_view doc_root,
     http::request<Body, http::basic_fields<Allocator>> &&req,
-    Send &&send, callback function)
+    Send &&send, callback function, std::string &message)
 {
 
     auto const ok_response =
@@ -879,6 +239,20 @@ void handle_request(
         res.set(http::field::content_type, "text/html");
         res.keep_alive(req.keep_alive());
         res.body() = "The resource '" + std::string(target) + "' was not found.";
+        res.prepare_payload();
+        return res;
+    };
+
+    // Returns a Server sent event response
+    auto const sse_message =
+        [&req](beast::string_view data)
+    {
+        http::response<http::string_body> res{http::status::ok, req.version()};
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = "\nevent: ping\n\n";                    // Set the event name.
+        res.body() += "data: " + std::string(data) + "\n\n"; // Set the event data.
         res.prepare_payload();
         return res;
     };
@@ -951,8 +325,26 @@ void handle_request(
         {
 
             auto test = std::string(req.at(http::field::content_type));
+            std::cout << req.at(http::field::content_type) << std::endl;
             std::string out_path;
             auto cp = check_if_file(test);
+
+            /*
+            if(req.at(http::field::content_type)=="text/event-stream"){
+                 int i=0;
+                while(true){
+                    i++;
+                    std::cout<<"WAZZUP"<<std::endl;
+                    message="text/event-stream";
+                    return send[std::move(sse_message("PACKAGE "+std::to_string(i)))];
+
+                    sleep(1);
+
+                }
+                return;
+                //return;
+            }*/
+
             if (cp != "empty")
             { // std::cout<<check_if_file(test)<<std::endl;
                 auto filename = parse_write_file(req.body());
@@ -962,7 +354,7 @@ void handle_request(
             }
             else
             {
-                out_path = function.post(req,function.obj);
+                out_path = function.post(req, function.obj);
 
                 std::cout << out_path << std::endl;
             }
@@ -1051,6 +443,3 @@ void handle_request(
         };
     }
 };
-
-
-

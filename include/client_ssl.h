@@ -58,6 +58,7 @@ public:
     boost::beast::tcp_stream http_stream{ ioc };
 
     boost::beast::flat_buffer buffer;
+     boost::beast::flat_buffer response_buffer;
     http::response<http::string_body> res;
 
     http::request<http::string_body> req;
@@ -173,6 +174,9 @@ public:
     
     };
     std::string response_body() { return(std::string(res.body())); };
+
+
+    
 
 
 };

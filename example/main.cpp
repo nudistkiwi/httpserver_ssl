@@ -39,7 +39,9 @@ keyvault* hallo = (keyvault*) B;
 //https_client_request req2("GET", "/v1/models");
 //req2.send_request("api.openai.com", "443");
 hallo->data();
+json request=json::parse(A.body());
 std::string token=hallo->operator()("OpenAI");
+//std::string token=conf.trezor("OpenAI");
 https_client_request req2("POST", "/v1/chat/completions");
 req2.req.set(http::field::authorization,token);
 //req2.req.set(http::field::content_type,"application/json");
@@ -47,22 +49,37 @@ req2.req.set(http::field::authorization,token);
 json JS;
 json JS2;
 JS2["role"]="user";
-JS2["content"]="Whats the newest Movie you know in your Training Data?";
-std::vector<json> Ax;
-Ax.push_back(JS2);
+//JS2["content"]="Whats the newest Movie you know in your Training Data?";
+
+//JS2["content"]=line;
+
+
+JS2["content"]="dsfdsf";
+//std::vector<json> Ax;
+//memory.push_back(JS2);
 
     JS["model"] = "gpt-3.5-turbo";
-    JS["messages"] = Ax;
+
+//JS["messages"] = memory;
+    JS["messages"] = "dfsfd";
+
+    //JS["max_tokens"] = 60;
     JS["temperature"] = 0.7;
     req2.set_body(JS);
 
 
-//req2.req.body()="{\"messages\": [{\"role\": \"user\", \"content\": \"Say this is a test!\"}],\"model\":\"gpt-3.5-turbo\", \"temperature\": 0.7}";
-//req2.req.set(http::field::content_length,"109");
-std::cout<<req2.req<<std::endl;
+
 req2.send_request("api.openai.com", "443");
-//req2.req.set(http::)
-//req2.req.set(http::field::au
+
+json response =json::parse(req2.res.body());
+std::string message=response["choices"][0]["message"]["content"].dump();
+
+dataframe o(0,1);
+o.insert(response.dump());
+o.write_csv("ai.json");
+std::cout<<message<<std::endl;
+
+//memory.push_back(response["choices"][0]["message"]);
 
 std::cout<<req2.res.body()<<std::endl;
 
@@ -152,16 +169,19 @@ int main(//int argc, char* argv[]
 
     //std::string ciphertext = "T0TsiTwtKeNjYgiM7x1yWkQv4bGFL4gPPaJ6pnZU6H0=";
     //std::string key = "my_secret_key_1234";
-std::string as;
+std::string pass;
+std::string user;
 
-std::cout<<"Password:"<<std::endl;
-std::cin>>as;
+std::cout<<" Please type Username:";
+std::cin>>user;
+std::cout<<"Password:";
+std::cin>>pass;
 
   //test.write_sqlite("server.db","userzero",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
   
 //  keyvault first;
 //  first.insert("admin",as);
- keyvault vault("server.db","admin",as); 
+ keyvault vault("server.db",user,pass); 
  //vault.insert_new("userzero","qwertzuiop"); 
  vault.data();
 
