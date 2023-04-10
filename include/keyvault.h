@@ -124,6 +124,13 @@ class keyvault
 {
 
 public:
+
+    bool locked(){
+
+        if(true==flag){return false;}
+        else{return true;}
+    }
+
     keyvault()
     {
         flag = false;
@@ -262,6 +269,21 @@ public:
             X.write_sqlite(vault, account, std::vector<std::string>{"TEXT", "BLOB"}, std::vector<int>{1});
         }
     }
+
+
+    void new_account(std::string account, std::string token,std::string db)
+    {
+
+
+            dataframe X(0, 2);
+            X.insert(std::vector<std::string>{"account", "token"});
+            // auto keys=key(token);
+            token = encrypt(token, token);
+            X.insert(std::vector<std::string>{account, token});
+            // X.print();
+            X.write_sqlite(db, account, std::vector<std::string>{"TEXT", "BLOB"}, std::vector<int>{1});
+    }
+
 
 private:
     bool flag;

@@ -32,14 +32,45 @@ std::string vaultname="database.db";
 };
 
 
-std::string callback(http::request<http::string_body>& A,void* B) {
+std::string callback(http::request<http::string_body>& A,http::response<http::string_body>& C,std::string & D, void* B) {
+
+    std::cout<<"CCAALLBACK"<<std::endl;
+/*
+json request3=json::parse(A.body());
+
+std::string xl="/blickgem/fa1/g"+std::string(request3["prompt"])+".pdf";
+https_client_request req3("GET", xl);
+req3.send_request("www.statistik.at", "443");
+
+req3.dump_file(std::string(request3["prompt"])+".pdf");
+*/
+//return("/success.json");
+     //http::response<http::string_body> res{http::status::ok, req.version()};
+     //C.set(http::field::status_uri,http::status::ok);
+       C.result(http::status::ok);
+       C.version(A.version());
+       
+        C.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        C.set(http::field::content_type, "text/html");
+        C.keep_alive(A.keep_alive());
+        C.body() = "WHOOT";
+        C.prepare_payload();
+
+
+//    return("/success.json");
+
 
 keyvault* hallo = (keyvault*) B;
 //std::cout<<hallo->passcode<<std::endl;
 //https_client_request req2("GET", "/v1/models");
 //req2.send_request("api.openai.com", "443");
+
 hallo->data();
 json request=json::parse(A.body());
+std::cout<<request.dump()<<std::endl;
+std::cout<<request["operation"]<<std::endl;
+if(request["operation"]=="chatbot"){
+std::cout<<"GPT Start"<<std::endl;
 std::string token=hallo->operator()("OpenAI");
 //std::string token=conf.trezor("OpenAI");
 https_client_request req2("POST", "/v1/chat/completions");
@@ -47,28 +78,28 @@ req2.req.set(http::field::authorization,token);
 //req2.req.set(http::field::content_type,"application/json");
 //req2.req.set(http::field::content_length,"109");
 json JS;
-json JS2;
-JS2["role"]="user";
+//json JS2;
+//JS2["role"]="user";
 //JS2["content"]="Whats the newest Movie you know in your Training Data?";
 
 //JS2["content"]=line;
 
 
-JS2["content"]="dsfdsf";
+//JS2["content"]="dsfdsf";
 //std::vector<json> Ax;
 //memory.push_back(JS2);
 
     JS["model"] = "gpt-3.5-turbo";
 
 //JS["messages"] = memory;
-    JS["messages"] = "dfsfd";
+JS["messages"]=request["conversation"];
 
     //JS["max_tokens"] = 60;
     JS["temperature"] = 0.7;
     req2.set_body(JS);
 
 
-
+std::cout<<JS.dump()<<std::endl;
 req2.send_request("api.openai.com", "443");
 
 json response =json::parse(req2.res.body());
@@ -102,14 +133,43 @@ std::cout<<req2.res.body()<<std::endl;
     req2.send_request("api.pushover.net", "443");
 
 */
-    std::cout<<"CCAALLBACK"<<std::endl;
-    return("/success.json");
+C=req2.res;
+}
+
+return("");
+
 };
 
 
 int main(//int argc, char* argv[]
 )
 {
+
+    std::string line="gemliste_nam.csv";
+    dataframe test;
+    test.open_csv(line);
+    test.check();
+    int l;
+    std::cout<<test.rows<<std::endl;
+    for(int i=1;i<=test.rows;i++){
+    dataframe out(0,1);
+
+    //out.insert(test(i,1));
+   
+    
+   
+    out.regex_expand("[0-9][0-9][0-9][0-9][0-9]",1);
+   //  out.print();
+
+    dataframe out2(0,1);
+    out2.insert(test(i,1));
+
+    out2.regex_expand("([A-Za-zÖöÄäÜüß ]+)",1);
+     
+    //out.print();
+    //out2.print();
+    
+    }
     //   OpenSSL_add_all_algorithms();
     // Check command line arguments.
     /*
@@ -159,9 +219,9 @@ int main(//int argc, char* argv[]
      //std::function<std::string(std::vector<std::string>)> func=callback;
 
  //OpenSSL_add_all_algorithms();
-    keyvault *adsd =new keyvault; ;
+    keyvault *adsd =new keyvault;
     //std::shared_ptr<keymanager> hs;
-    std::function<std::string(http::request<http::string_body>&,void*)> func=callback;
+    std::function<std::string(http::request<http::string_body>&,http::response<http::string_body>&,std::string&, void*)> func=callback;
     server_configuration funcs(func,"8080");
     
 

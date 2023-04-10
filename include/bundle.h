@@ -354,7 +354,14 @@ void handle_request(
             }
             else
             {
-                out_path = function.post(req, function.obj);
+                http::response<http::string_body> response;
+                std::string file;
+                out_path = function.post(req,response,file, function.obj);
+                //out_path = function.post(req, function.obj);
+                if(file==""){
+
+                    return send(std::move(response));
+                }
 
                 std::cout << out_path << std::endl;
             }
@@ -443,3 +450,4 @@ void handle_request(
         };
     }
 };
+

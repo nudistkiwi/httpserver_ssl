@@ -50,6 +50,7 @@ class server_configuration
 {
     std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> test;
     std::function<std::string(http::request<http::string_body> &, void *)> post_func;
+    std::function<std::string(http::request<http::string_body> &,http::response<http::string_body> &,std::string&, void *)> post_func_ext;
     std::function<std::string(http::request<http::string_body> &, void *)> event_func;
     std::function<std::string(http::request<http::string_body> &, void *)> rpost_func;
     // std::function<std::string(http::request<http::string_body> &)> post_func1;
@@ -113,6 +114,16 @@ public:
         // cookie_base=std::to_string(rand()*multiplicator);
     };
 
+    server_configuration(std::function<std::string(http::request<http::string_body> &,http::response<http::string_body> &,std::string &, void *)> post_func_,char *ports_)
+    {
+
+        post_func_ext = post_func_;
+        ports = ports_;
+        set_server_config();
+        // cookie_base=std::to_string(rand()*multiplicator);
+    };
+
+
     void set_server_config()
     {
         //   sqlite3 *DB;
@@ -139,6 +150,7 @@ public:
     }
 
     std::string post(http::request<http::string_body> &A, void *x) { return (post_func(A, x)); };
+    std::string post(http::request<http::string_body> & request,http::response<http::string_body> & response,std::string& output, void * x) { return post_func_ext(request,response,output, x); };
     std::string get(http::request<http::string_body> &A) { return (get_func(A)); };
 
     void set_test(std::function<std::string(http::request<http::string_body> &, http::response<http::string_body> &)> X) { test = X; };
@@ -313,3 +325,7 @@ public:
         }
     };
 };
+
+
+
+

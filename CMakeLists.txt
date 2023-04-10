@@ -38,7 +38,7 @@ add_executable(test example/main.cpp)
 
 
 
-option(USE_SSL "Use no TLS" ON) #OFF by default
+option(USE_SSL "Use no TLS" OFF) #OFF by default
 if(USE_SSL)
 add_library(httpserver_ssl STATIC src/httpserver_ssl.cpp)
 target_include_directories(httpserver_ssl PUBLIC include/ssl)

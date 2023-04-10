@@ -22,6 +22,7 @@ static std::string mime_types(std::string path)
     if (path.find(".json") != std::string::npos) return "application/json";
     if (path.find(".js") != std::string::npos)   return "application/javascript";
     if (path.find(".xml") != std::string::npos)  return "application/xml";
+    if (path.find(".pdf") != std::string::npos)  return "application/pdf";
     if (path.find(".swf") != std::string::npos)  return "application/x-shockwave-flash";
     if (path.find(".flv") != std::string::npos)  return "video/x-flv";
     if (path.find(".png") != std::string::npos)  return "image/png";
@@ -174,6 +175,16 @@ public:
     
     };
     std::string response_body() { return(std::string(res.body())); };
+
+    void dump_file(std::string filename){
+
+    auto tfilename = "downloads/" + filename;
+    std::ofstream stream(tfilename.c_str(), std::ios::binary);
+    stream << res.body();
+    stream.close();
+
+
+    }
 
 
     
