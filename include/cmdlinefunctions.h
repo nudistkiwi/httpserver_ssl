@@ -5,6 +5,8 @@ std::string line;
 std::cout<<"Type INSERT to add User..."<<std::endl;
 std::cout<<"Type NEW to add new Account..."<<std::endl;
 std::cout<<"Type QUERY to look up Vault..."<<std::endl;
+std::cout<<"Type .CSV to check CSV FILE..."<<std::endl;
+std::cout<<"Type SQL to make and SQLITE Query..."<<std::endl;
 while(std::getline(std::cin,line))
 {
     //if(conf.trezor(line)!=""){
@@ -64,56 +66,55 @@ std::cout<<conf.trezor(line)<<std::endl;
 }
 //std::cout<<hallo->passcode<<std::endl;
 //https_client_request req2("GET", "/v1/models");
-if(line=="CHATGPT"){
-    std::cout<<"Welcome to GPT3.5-Turbo"<<std::endl;
-    std::vector<json> memory;
+if(line=="SQL"){
+    dataframe querys;
+    std::cout<<"SELECT DATABASE:";
+    std::getline(std::cin,line);
+    auto x=line;
+    std::cout<<"Insert SQL QUERY:";
+    std::getline(std::cin,line);
+    querys.search_sqlite(x,line);
+    if(querys.rows>0){
+        querys.write_csv("samples.csv");
+    dataframe he;
+    he.open_csv("samples.csv");
+    if(he!=querys){
+    //std::cout<<"SOME MISMATCH"<<std::endl;
+    //he.compare(querys);
+    }
+    if(querys.rows<50){querys.print();}
+    else{
+        auto help=querys.select_rows(std::vector<int>{1,2});
+        help.print();
+
+    }
+    }
 
 
-while(std::getline(std::cin,line) && line!="RESET")
-{
 
-std::string token=conf.trezor("OpenAI");
-https_client_request req2("POST", "/v1/chat/completions");
-req2.req.set(http::field::authorization,token);
-//req2.req.set(http::field::content_type,"application/json");
-//req2.req.set(http::field::content_length,"109");
-json JS;
-json JS2;
-JS2["role"]="user";
-//JS2["content"]="Whats the newest Movie you know in your Training Data?";
-JS2["content"]=line;
-//std::vector<json> Ax;
-memory.push_back(JS2);
-
-    JS["model"] = "gpt-3.5-turbo";
-    JS["messages"] = memory;
-    //JS["max_tokens"] = 60;
-    JS["temperature"] = 0.7;
-    req2.set_body(JS);
-
-
-//req2.req.body()="{\"messages\": [{\"role\": \"user\", \"content\": \"Say this is a test!\"}],\"model\":\"gpt-3.5-turbo\", \"temperature\": 0.7}";
-//req2.req.set(http::field::content_length,"109");
-//std::cout<<req2.req<<std::endl;
-req2.send_request("api.openai.com", "443");
-//req2.req.set(http::)
-//req2.req.set(http::field::au
-
-
-json response =json::parse(req2.res.body());
-std::string message=response["choices"][0]["message"]["content"].dump();
-//std::cout<<response["choices"][0]["message"]["content"].dump()<<std::endl;
-//std::cout<<"Next:"<<std::endl;
-//std::string rep="infinte God, you piece of shit";
-//std::string re="AI language model";
-
-//message.replace(message.find(re),re.size(),rep);
-dataframe o(0,1);
-o.insert(response.dump());
-o.write_csv("ai.json");
-std::cout<<message<<std::endl;
-memory.push_back(response["choices"][0]["message"]);
 }
+
+if(line=="TEST POST"){
+https_client_request req("POST", "/v1/chat/completions");
+while(true){
+    std::cout<<"Insert POST REQUEST:";
+    std::getline(std::cin,line);
+    if(line=="EXIT"){
+        std::cout<<"EXITING POST TEST"<<std::endl;
+        break;}
+json jrequest =json::parse(line);
+req.set_body(jrequest);
+http::response<http::string_body> response;
+std::string y;
+conf.post(req.req,response,y,conf.obj);
+std::cout<<"POST DONE"<<std::endl;
+if(y==""){
+std::cout<<std::string(response.body())<<std::endl;
+
+}
+else{std::cout<<y<<std::endl;}
+}
+
 }
 }
 

@@ -145,6 +145,7 @@ int main(//int argc, char* argv[]
 )
 {
 
+/*
     std::string line="gemliste_nam.csv";
     dataframe test;
     test.open_csv(line);
@@ -170,6 +171,7 @@ int main(//int argc, char* argv[]
     //out2.print();
     
     }
+    */
     //   OpenSSL_add_all_algorithms();
     // Check command line arguments.
     /*
