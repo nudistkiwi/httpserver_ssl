@@ -141,10 +141,45 @@ return("");
 };
 
 
+
+
+void entry(){
+
+dataframe testd;
+testd.database_tables("server.db");
+//testd.print();
+if(testd.rows==1){
+    std::string line;
+std::string db;
+    keyvault news;
+    std::cout<<"set Database:";
+    std::getline(std::cin,db);
+
+    std::cout<<"NEW ACCOUNT:";
+    std::getline(std::cin,line);
+    auto x=line;
+    std::cout<<"Token:";
+    std::getline(std::cin,line);
+    std::cout<<x<<" "<<line<<std::endl;
+    news.new_account(x,line,db);
+    std::cout<<"NEW ACCOUNT SUCCESSFULL!!"<<std::endl;
+}
+
+}
+
+
+using namespace boost::asio;
 int main(//int argc, char* argv[]
 )
 {
+/*
+        io_service io_service;
+        tcp_server server(io_service, 1234);
+        io_service.run();
+*/
 
+
+entry();
 /*
     std::string line="gemliste_nam.csv";
     dataframe test;
@@ -184,39 +219,7 @@ int main(//int argc, char* argv[]
         return EXIT_FAILURE;
     }
     */
-/*
-    sqlite3 *DB;
-    sqlite3_stmt *stmt = 0;
-   auto exit = sqlite3_open("server.db", &DB);
-    dataframe A(0,1);
-    A.insert("value");
-    A.insert("/bettercallsaul123");
-    A.insert("/bettercallsaul1234");
-    A.insert("/bettercallsaul12345");
-    A.insert("/bettercallsaul123456");
-    A.write_sqlite(DB,stmt,"tickets");
 
-    dataframe B(0,2);
-    B.insert("username");
-    B.insert("password");
-    B.insert("userzero");
-    B.insert("abc314");
-
-    B.write_sqlite(DB,stmt,"users",std::vector<int>{1});
-
-
-    dataframe C(0,1);
-    C.insert("file");
-    
-    C.insert("/style.css");
-    C.insert("/login.html");
-    C.insert("/script.js");
-    C.insert("/script2.js");
-    //C.insert("/");
-    //C.insert("/index.html");
-
-    C.write_sqlite("server.db","whitelisted",std::vector<int>{1});
-*/
     //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
      //std::function<std::string(std::vector<std::string>)> func=callback;
 

@@ -9,6 +9,9 @@
 #include <boost/functional/hash.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/asio/read_until.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 // #include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -451,3 +454,131 @@ void handle_request(
     }
 };
 
+
+
+struct tcp_listener {
+   
+   
+    std::string port;
+    boost::asio::io_context io_context;
+    tcp::acceptor acceptor;
+   //tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)));
+        tcp_listener()
+        : port("9090"), io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)))
+    {}
+
+        tcp_listener(std::string por)
+        : port(por), io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)))
+    {}
+
+    void run() {
+      //  acceptor=std::move(tcp::acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port))));
+        //io_context.run();
+        accept_connections();
+    };
+
+void accept_connections() {
+    std::cout<<"Waiting for TCP.."<<std::endl;
+    acceptor.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
+        if (!ec) {
+            std::cout<<"ACCEPTED"<<std::endl;
+            // Read data from the socket
+            net::streambuf buffer;
+            net::async_read_until(socket, buffer, '\n',
+                [this, &socket, &buffer](boost::system::error_code ec, std::size_t bytes_transferred) {
+                    if (!ec) {
+                        // Convert the buffer to a string
+                        std::string data = boost::asio::buffer_cast<const char*>(buffer.data());
+                        // Handle the received data here
+                        std::cout<<"RECEIVED"<<std::endl;
+                        std::cout<<data<<std::endl;
+                        std::cout<<"END"<<std::endl;
+                    }
+                    // Accept the next connection
+                    accept_connections();
+                });
+        } else {
+            // Handle the error here
+            std::cout<<"WTF"<<std::endl;
+        }
+    });
+}
+
+};
+
+//tcp_listener(std::string po) {};
+/*
+    tcp_listener(std::string po) {
+        port = po;
+    };
+*/
+
+
+
+
+using namespace boost::asio;
+using namespace boost::asio::ip;
+
+
+
+static std::string testtcp(std::string x){
+
+    auto xx="You responded "+x;
+    return(xx);
+}
+
+class tcp_server {
+public:
+    tcp_server(io_service& io_service, int port)
+        : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
+        socket_(io_service) {
+            std::cout<<"START TCP SERVER..."<<std::endl;
+            //data_="You wrote something";
+            handler=testtcp;
+        do_accept();
+    }
+
+private:
+    void do_accept() {
+        acceptor_.async_accept(socket_, [this](boost::system::error_code ec) {
+            if (!ec) {
+                std::cout << "Client connected: " << socket_.remote_endpoint() << std::endl;
+                do_read();
+            }
+            do_accept();
+        });
+    }
+
+    void do_read() {
+        
+        //auto self(shared_from_this());
+        async_read_until(socket_, buffer_,'\n',
+            [this](boost::system::error_code ec, std::size_t length) {
+            if (!ec) {
+                std::string data(net::buffers_begin(buffer_.data()), net::buffers_end(buffer_.data()));
+                std::cout << "Received data: " << data << std::endl;
+              
+                buffer_.consume(length);
+                do_write(data);
+                //do_read();
+            }
+        });
+    }
+
+
+ void do_write(std::string dat) {
+        auto temp=handler(dat);
+        //std::cout<<temp<<std::endl;
+        async_write(socket_, buffer(temp, temp.size()),
+            [this](boost::system::error_code ec, std::size_t) {
+            if (!ec) {
+                do_read();
+            }
+        });
+ }
+    tcp::acceptor acceptor_;
+    tcp::socket socket_;
+    std::string data_;
+    net::streambuf buffer_;
+    std::function<std::string(std::string)> handler;
+};

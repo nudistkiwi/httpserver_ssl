@@ -396,33 +396,45 @@ private:
 
          // The io_context is required for all I/O
          net::io_context ioc{ threads };
+         //net::io_context ioc2;
 
          // Create and launch a listening port
          //std::function<std::string(std::vector<std::string>)> func=[](std::vector<std::string> A){return(A[0]);};
 
-        std::vector<std::thread> v;
-        v.reserve(threads - 1);
+
         std::make_shared<listener>(
              ioc,
              tcp::endpoint{ address, port },
              doc_root,
              func
              )->run();
-            
+             
+        tcp_server all(ioc,1234);    
+        //ioc2.run();
 
+        std::vector<std::thread> v;
+        v.reserve(threads - 1);
+        
     for(auto i = threads - 1; i > 0; --i)
         v.emplace_back(
         [&ioc]
         {
             ioc.run();
         });
-
-
+/*
+        v.emplace_back(
+        [&ioc2]
+        {
+            ioc2.run();
+        });
+*/
 std::thread input_thread([&ioc,&func]{read_input(ioc,func);});
+//tcp_listener listener("9091"); // Create a TCP listener on port 9090
+//std::thread tcp_connector([&ioc]{ ioc.run();});
 
  std::string ad;
  //std::cin>>ad;
- //ioc.run();
+
 
 
 for(auto &t:v){
@@ -430,6 +442,7 @@ t.join();
 
 }
 input_thread.join();
+//tcp_connector.join();
             // ioc.run();
 
 

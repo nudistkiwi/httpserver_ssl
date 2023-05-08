@@ -419,7 +419,7 @@ void httpserver_ssl(server_configuration func) {
         //[](std::vector<std::string> A){return(A[0]);}
         func
         )->run();
-
+tcp_server all(ioc,1234); 
  for(auto i = threads - 1; i > 0; --i)
         v.emplace_back(
         [&ioc]
@@ -429,6 +429,7 @@ void httpserver_ssl(server_configuration func) {
 
 
 std::thread input_thread([&ioc,&func]{read_input(ioc,func);});
+
 
  std::string ad;
  //std::cin>>ad;

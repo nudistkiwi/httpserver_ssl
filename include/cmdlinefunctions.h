@@ -2,11 +2,15 @@
 void read_input(net::io_context& ioc,server_configuration & conf){
 
 std::string line;
+
+
+
 std::cout<<"Type INSERT to add User..."<<std::endl;
 std::cout<<"Type NEW to add new Account..."<<std::endl;
 std::cout<<"Type QUERY to look up Vault..."<<std::endl;
 std::cout<<"Type .CSV to check CSV FILE..."<<std::endl;
 std::cout<<"Type SQL to make and SQLITE Query..."<<std::endl;
+std::cout<<"Type TEST POST to Test POST..."<<std::endl;
 while(std::getline(std::cin,line))
 {
     //if(conf.trezor(line)!=""){
