@@ -405,7 +405,48 @@ void httpserver_ssl(server_configuration func) {
     // The io_context is required for all I/O
     net::io_context ioc{ threads };
     ssl::context ctx{ssl::context::tlsv12};
+    //load_server_certificate(ctx);
+//    std::string key=func.trezor("server.key");
+//    std::string pem=func.trezor("server.pem");
+
+    //if(key==""){
+/*
+    while(false){
+        std::cin>>key;
+        auto pe=func.trezor.encrypt2(key,"x7bhm3Max7bhm3Max7bhm3Ma");
+        std::cout<<"START"<<std::endl<<std::endl;
+        std::cout<<func.trezor.decrypt2(pe,"x7bhm3Max7bhm3Max7bhm3Ma")<<std::endl;;
+        std::cout<<"END"<<std::endl<<std::endl;
+
+    std::cin>>key;
+    dataframe q(0,2);
+    q.insert("account");
+    q.insert("token");
+    q.insert("server.key");
+
+    std::cout<<"KEY FILE NAME"<<std::endl;
+    std::cin>>key;
+    q.insert_file(key);
+    
+    func.trezor.insert_new("server.key",q.frame.back());
+    std::cout<<"PEM FILE NAME"<<std::endl;
+    std::cin>>pem;
+    q.insert("server.pem");
+    q.insert_file(pem);
+    q.print();
+    func.trezor.insert_new("server.pem",q.frame.back());
+
+    key=func.trezor("server.key");
+    pem=func.trezor("server.pem");
+    std::cout<<key<<std::endl;
+    key=q(2,2);
+    pem=q(3,2);
+    }
+*/
+
+    //load_server_certificate_vault(ctx,pem,key);
     load_server_certificate(ctx);
+
     // Create and launch a listening port
     //std::function<std::string(std::vector<std::string>)> func=[](std::vector<std::string> A){return(A[0]);};
       

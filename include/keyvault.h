@@ -1,6 +1,63 @@
 
+#include <vector>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 
-// Define the encryption function
+static std::vector<unsigned char> encrypt_symmetric_new(const std::vector<unsigned char>& plaintext, const std::string& key) {
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(ctx);
+    EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, (const unsigned char*)key.c_str(), nullptr);
+
+    unsigned char iv[EVP_MAX_IV_LENGTH];
+    RAND_bytes(iv, EVP_MAX_IV_LENGTH);
+
+    EVP_EncryptInit_ex(ctx, nullptr, nullptr, nullptr, iv);
+
+    int out_len = plaintext.size() + EVP_MAX_BLOCK_LENGTH;
+    std::vector<unsigned char> ciphertext(out_len);
+
+    int update_len = 0;
+    EVP_EncryptUpdate(ctx, ciphertext.data(), &update_len, plaintext.data(), plaintext.size());
+
+    int final_len = 0;
+    EVP_EncryptFinal_ex(ctx, ciphertext.data() + update_len, &final_len);
+
+    out_len = update_len + final_len;
+    ciphertext.resize(out_len + EVP_MAX_IV_LENGTH);
+    std::copy_n(iv, EVP_MAX_IV_LENGTH, ciphertext.data() + out_len);
+    
+    EVP_CIPHER_CTX_free(ctx);
+    
+    return ciphertext;
+}
+
+static std::vector<unsigned char> decrypt_symmetric_new(const std::vector<unsigned char>& ciphertext, const std::string& key)
+{
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(ctx);
+    EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, (const unsigned char*)key.c_str(), nullptr);
+
+    unsigned char iv[EVP_MAX_IV_LENGTH];
+    std::copy_n(ciphertext.end() - EVP_MAX_IV_LENGTH, EVP_MAX_IV_LENGTH, iv);
+
+    std::vector<unsigned char> plaintext(ciphertext.size() - EVP_MAX_IV_LENGTH);
+
+    int out_len = 0;
+    EVP_DecryptInit_ex(ctx, nullptr, nullptr, nullptr, iv);
+    EVP_DecryptUpdate(ctx, plaintext.data(), &out_len, ciphertext.data(), ciphertext.size() - EVP_MAX_IV_LENGTH);
+
+    int final_len = 0;
+    EVP_DecryptFinal_ex(ctx, plaintext.data() + out_len, &final_len);
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    plaintext.resize(out_len + final_len); // Resize the vector to the actual plaintext length
+
+    return plaintext;
+}
+
+
+
 
 static std::string encrypt_symmetric(const std::string &plaintext, const std::string &key)
 {
@@ -190,9 +247,31 @@ public:
         return temp;
     };
 
-    std::string encrypt(const std::string &text, const std::string &pass)
+
+
+
+
+    std::vector<unsigned char>  encrypt2(std::vector<unsigned char> &text, const std::string &pass)
+    {
+        //std::vector<unsigned char> encodedData(text.begin(), text.end());
+        auto keys = key(pass);
+        //std::cout<<encrypt_symmetric(text, keys)<<std::endl;
+        return encrypt_symmetric_new(text, keys);
+    }
+
+    std::vector<unsigned char> decrypt2(std::vector<unsigned char> text, const std::string pass)
     {
         auto keys = key(pass);
+        //std::vector<unsigned char> encodedData(text.begin(), text.end());
+        return decrypt_symmetric_new(text, keys); // decrypt the ciphertext using the symmetric encryption algorithm and the IV
+    }
+
+
+    std::string encrypt(const std::string &text, const std::string &pass)
+    {
+        
+        auto keys = key(pass);
+        //std::cout<<encrypt_symmetric(text, keys)<<std::endl;
         return encrypt_symmetric(text, keys);
     }
 

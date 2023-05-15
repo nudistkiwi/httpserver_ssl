@@ -456,63 +456,6 @@ void handle_request(
 
 
 
-struct tcp_listener {
-   
-   
-    std::string port;
-    boost::asio::io_context io_context;
-    tcp::acceptor acceptor;
-   //tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)));
-        tcp_listener()
-        : port("9090"), io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)))
-    {}
-
-        tcp_listener(std::string por)
-        : port(por), io_context(), acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port)))
-    {}
-
-    void run() {
-      //  acceptor=std::move(tcp::acceptor(io_context, tcp::endpoint(tcp::v4(), std::stoi(port))));
-        //io_context.run();
-        accept_connections();
-    };
-
-void accept_connections() {
-    std::cout<<"Waiting for TCP.."<<std::endl;
-    acceptor.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
-        if (!ec) {
-            std::cout<<"ACCEPTED"<<std::endl;
-            // Read data from the socket
-            net::streambuf buffer;
-            net::async_read_until(socket, buffer, '\n',
-                [this, &socket, &buffer](boost::system::error_code ec, std::size_t bytes_transferred) {
-                    if (!ec) {
-                        // Convert the buffer to a string
-                        std::string data = boost::asio::buffer_cast<const char*>(buffer.data());
-                        // Handle the received data here
-                        std::cout<<"RECEIVED"<<std::endl;
-                        std::cout<<data<<std::endl;
-                        std::cout<<"END"<<std::endl;
-                    }
-                    // Accept the next connection
-                    accept_connections();
-                });
-        } else {
-            // Handle the error here
-            std::cout<<"WTF"<<std::endl;
-        }
-    });
-}
-
-};
-
-//tcp_listener(std::string po) {};
-/*
-    tcp_listener(std::string po) {
-        port = po;
-    };
-*/
-
 
 
 

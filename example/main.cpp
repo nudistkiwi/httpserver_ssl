@@ -169,6 +169,41 @@ std::string db;
 
 
 using namespace boost::asio;
+
+
+std::vector<unsigned char> readFileToVector(const std::string& filename)
+{
+    std::ifstream file(filename, std::ios::binary);
+    
+    if (!file)
+    {
+        // Error handling - Failed to open the file
+        // You can throw an exception or handle the error as needed
+        // For simplicity, this example terminates the program
+        throw std::runtime_error("Failed to open the file.");
+    }
+    
+    // Determine the file size
+    file.seekg(0, std::ios::end);
+    std::streampos fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+    
+    // Read the file content into a vector
+    std::vector<unsigned char> fileContent(fileSize);
+    file.read(reinterpret_cast<char*>(fileContent.data()), fileSize);
+    
+    if (!file)
+    {
+        // Error handling - Failed to read the file
+        // You can throw an exception or handle the error as needed
+        // For simplicity, this example terminates the program
+        throw std::runtime_error("Failed to read the file.");
+    }
+    
+    return fileContent;
+}
+
+
 int main(//int argc, char* argv[]
 )
 {
@@ -177,8 +212,40 @@ int main(//int argc, char* argv[]
         tcp_server server(io_service, 1234);
         io_service.run();
 */
-
-
+/*
+int k;
+    auto xck=readFileToVector("localhost.decrypted.key");
+    keyvault *adsd =new keyvault;
+    dataframe jkl(0,2);
+    jkl.insert("account");
+    jkl.insert("token");
+    jkl.insert("server.key");
+    jkl.insert_file("localhost.decrypted.key");
+    //std::string str(xck.begin(),xck.end());
+    auto str=jkl.frame.back();
+    auto xc=std::vector<unsigned char>(str.begin(), str.end());
+    xck=xc;
+    //std::vector<unsigned char> xc{'a','d','d','d','f'};
+    auto xc1=adsd->encrypt2(xc,"x7bhm3Ma");
+    
+    str=std::string(xc1.begin(),xc1.end());
+    jkl.frame.back()=str;
+    jkl.write_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
+    jkl.frame.clear();
+    jkl.search_sqlite("server.db","SELECT \"token\" FROM \"admin\" WHERE \"account\"='server.key';");
+    dataframe ol(0,1);
+    ol.insert("server.key");
+    ol.search_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<std::string>{"account"},std::vector<std::string>{"token"});
+    str=ol.frame.back();
+    //str=jkl.frame.back();
+    std::cout<<xc1.size()<<std::endl;
+    xc1=std::vector<unsigned char>(str.begin(), str.end());
+    std::cout<<xc1.size()<<std::endl;
+    auto xcc=adsd->decrypt2(xc1,"x7bhm3Ma");
+    if(xck==xcc){std::cout<<"ALL GODD"<<std::endl;}
+    else{std::cout<<"FAAAKKKK"<<std::endl;}
+    std::cin>>k;
+*/
 entry();
 /*
     std::string line="gemliste_nam.csv";
@@ -224,7 +291,7 @@ entry();
      //std::function<std::string(std::vector<std::string>)> func=callback;
 
  //OpenSSL_add_all_algorithms();
-    keyvault *adsd =new keyvault;
+
     //std::shared_ptr<keymanager> hs;
     std::function<std::string(http::request<http::string_body>&,http::response<http::string_body>&,std::string&, void*)> func=callback;
     server_configuration funcs(func,"8080");
