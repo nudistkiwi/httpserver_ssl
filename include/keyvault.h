@@ -31,6 +31,17 @@ static std::vector<unsigned char> encrypt_symmetric_new(const std::vector<unsign
     return ciphertext;
 }
 
+static std::string encrypt_symmetric_(const std::string& text, const std::string& key) {
+ 
+
+std::vector<unsigned char> plaintext(text.begin(),text.end());
+auto out=encrypt_symmetric_new(plaintext,key);
+
+return(std::string(out.begin(),out.end()));
+
+ }
+
+
 static std::vector<unsigned char> decrypt_symmetric_new(const std::vector<unsigned char>& ciphertext, const std::string& key)
 {
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
@@ -56,6 +67,16 @@ static std::vector<unsigned char> decrypt_symmetric_new(const std::vector<unsign
     return plaintext;
 }
 
+static std::string decrypt_symmetric_(const std::string& text, const std::string& key) {
+ 
+
+std::vector<unsigned char> plaintext(text.begin(),text.end());
+auto out=decrypt_symmetric_new(plaintext,key);
+
+return(std::string(out.begin(),out.end()));
+
+
+ }
 
 
 
@@ -250,6 +271,21 @@ public:
 
 
 
+    std::string  encrypt3(std::string &text, const std::string &pass)
+    {
+        //std::vector<unsigned char> encodedData(text.begin(), text.end());
+        auto keys = key(pass);
+        //std::cout<<encrypt_symmetric(text, keys)<<std::endl;
+        return encrypt_symmetric_(text, keys);
+    }
+
+    std::string decrypt3(std::string text, const std::string pass)
+    {
+        auto keys = key(pass);
+        //std::vector<unsigned char> encodedData(text.begin(), text.end());
+        return decrypt_symmetric_(text, keys); // decrypt the ciphertext using the symmetric encryption algorithm and the IV
+    }
+
 
     std::vector<unsigned char>  encrypt2(std::vector<unsigned char> &text, const std::string &pass)
     {
@@ -272,13 +308,13 @@ public:
         
         auto keys = key(pass);
         //std::cout<<encrypt_symmetric(text, keys)<<std::endl;
-        return encrypt_symmetric(text, keys);
+        return encrypt_symmetric_(text, keys);
     }
 
     std::string decrypt(const std::string encrypted_text, const std::string pass)
     {
         auto keys = key(pass);
-        return decrypt_symmetric(encrypted_text, keys); // decrypt the ciphertext using the symmetric encryption algorithm and the IV
+        return decrypt_symmetric_(encrypted_text, keys); // decrypt the ciphertext using the symmetric encryption algorithm and the IV
     }
 
     void insert(std::string service, std::string token)
@@ -302,7 +338,7 @@ public:
             {
                 dataframe X(0, 1);
                 X.insert(service);
-                X.search_sqlite(vault, account, std::vector<std::string>{"account"}, std::vector<std::string>{"account", "token"});
+                X.search_sqlite(vault, account,std::vector<std::string>{"TEXT","BLOB"}, std::vector<std::string>{"account"}, std::vector<std::string>{"account", "token"});
                 //      X.print();
                 if (X.rows > 1)
                 {

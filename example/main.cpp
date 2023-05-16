@@ -207,22 +207,49 @@ std::vector<unsigned char> readFileToVector(const std::string& filename)
 int main(//int argc, char* argv[]
 )
 {
+
 /*
         io_service io_service;
         tcp_server server(io_service, 1234);
         io_service.run();
 */
 /*
-int k;
-    auto xck=readFileToVector("localhost.decrypted.key");
     keyvault *adsd =new keyvault;
+    std::string in;
+while(false){
+std::cin>>in;
+auto x=adsd->encrypt3(in,"x7bhm3Ma");
+auto y=adsd->decrypt3(x,"x7bhm3Ma");
+std::cout<<y<<std::endl;
+}
+
+int k;
+    //auto xck=readFileToVector("localhost.decrypted.key");
+
     dataframe jkl(0,2);
     jkl.insert("account");
     jkl.insert("token");
     jkl.insert("server.key");
     jkl.insert_file("localhost.decrypted.key");
     //std::string str(xck.begin(),xck.end());
-    auto str=jkl.frame.back();
+   auto str=jkl.frame.back();
+   auto xck=str;
+   str=adsd->encrypt3(str,"x7bhm3Ma");
+    jkl.frame.back()=str;
+    
+   
+    jkl.write_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
+    jkl.frame.clear();
+    jkl.search_sqlite("server.db","SELECT \"token\" FROM \"admin\" WHERE \"account\"='server.key';");
+    dataframe ol(0,1);
+    ol.insert("server.key");
+    ol.search_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<std::string>{"account"},std::vector<std::string>{"token"});
+    str=ol.frame.back();
+    
+    auto xcc=adsd->decrypt3(str,"x7bhm3Ma");
+    */
+   /*
+ 
     auto xc=std::vector<unsigned char>(str.begin(), str.end());
     xck=xc;
     //std::vector<unsigned char> xc{'a','d','d','d','f'};
@@ -242,10 +269,11 @@ int k;
     xc1=std::vector<unsigned char>(str.begin(), str.end());
     std::cout<<xc1.size()<<std::endl;
     auto xcc=adsd->decrypt2(xc1,"x7bhm3Ma");
+
     if(xck==xcc){std::cout<<"ALL GODD"<<std::endl;}
     else{std::cout<<"FAAAKKKK"<<std::endl;}
     std::cin>>k;
-*/
+    */
 entry();
 /*
     std::string line="gemliste_nam.csv";
