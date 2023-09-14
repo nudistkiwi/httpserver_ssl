@@ -25,11 +25,7 @@ std::cout<<"8...search for element:"<<std::endl;
 std::cout<<"11...clipboard search:"<<std::endl;
 */
 
-struct keymanager{
-std::string passcode="skfhdfd";
-std::string vaultname="database.db";
 
-};
 
 
 std::string callback(http::request<http::string_body>& A,http::response<http::string_body>& C,std::string & D, void* B) {
@@ -114,25 +110,7 @@ std::cout<<message<<std::endl;
 
 std::cout<<req2.res.body()<<std::endl;
 
-/*
-    std::cout << "POST REQUEST  " << A << std::endl;
-    https_client_request req2("POST", "/1/messages.json");
-    //https_client_request req("GET","/monitor/?line=14A&station=Keplerplatz&towards=Reumannplatz&countdown");
-    json JS;
-    //	dataframe hallo;
-    //	hallo.write_file(A);
 
-    JS["user"] = "u25eipbejdp986qk5cv6d2d9kt8x4d";
-    JS["message"] = "HAALLOOO";
-    JS["token"] = "ahh7x5h32p2upqohfny3s5ndyqtw25";
-
-
-
-    req2.set_body(JS);
-    //req.send_request("vtapi.floscodes.net","443");
-    req2.send_request("api.pushover.net", "443");
-
-*/
 C=req2.res;
 }
 
@@ -171,156 +149,38 @@ std::string db;
 using namespace boost::asio;
 
 
-std::vector<unsigned char> readFileToVector(const std::string& filename)
-{
-    std::ifstream file(filename, std::ios::binary);
-    
-    if (!file)
-    {
-        // Error handling - Failed to open the file
-        // You can throw an exception or handle the error as needed
-        // For simplicity, this example terminates the program
-        throw std::runtime_error("Failed to open the file.");
-    }
-    
-    // Determine the file size
-    file.seekg(0, std::ios::end);
-    std::streampos fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-    
-    // Read the file content into a vector
-    std::vector<unsigned char> fileContent(fileSize);
-    file.read(reinterpret_cast<char*>(fileContent.data()), fileSize);
-    
-    if (!file)
-    {
-        // Error handling - Failed to read the file
-        // You can throw an exception or handle the error as needed
-        // For simplicity, this example terminates the program
-        throw std::runtime_error("Failed to read the file.");
-    }
-    
-    return fileContent;
-}
-
 
 int main(//int argc, char* argv[]
 )
 {
 
+
 /*
-        io_service io_service;
-        tcp_server server(io_service, 1234);
-        io_service.run();
+int lp;
+
+std::string line;
+
+willhaben ui;
+
+
+
+ui.download_links("www.willhaben.at/iad/immobilien/neubauprojekte/niederoesterreich/");
+ui.download_links("www.willhaben.at/iad/immobilien/neubauprojekte/wien/");
+ui.download_links("www.willhaben.at/iad/immobilien/eigentumswohnung/wien/");
+ui.download_links("www.willhaben.at/iad/immobilien/eigentumswohnung/niederoesterreich/");
+ui.download_links("www.willhaben.at/iad/immobilien/haus-kaufen/wien/");
+ui.download_links("www.willhaben.at/iad/immobilien/haus-kaufen/niederoesterreich/");
+
+
+//ui.fetch_links();
+dataframe op;
+//op.open_sqlite("ingest.db","ImmoArchiv2");
+//ui.distro(op);
+
+//}
 */
-/*
-    keyvault *adsd =new keyvault;
-    std::string in;
-while(false){
-std::cin>>in;
-auto x=adsd->encrypt3(in,"x7bhm3Ma");
-auto y=adsd->decrypt3(x,"x7bhm3Ma");
-std::cout<<y<<std::endl;
-}
-
-int k;
-    //auto xck=readFileToVector("localhost.decrypted.key");
-
-    dataframe jkl(0,2);
-    jkl.insert("account");
-    jkl.insert("token");
-    jkl.insert("server.key");
-    jkl.insert_file("localhost.decrypted.key");
-    //std::string str(xck.begin(),xck.end());
-   auto str=jkl.frame.back();
-   auto xck=str;
-   str=adsd->encrypt3(str,"x7bhm3Ma");
-    jkl.frame.back()=str;
-    
-   
-    jkl.write_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
-    jkl.frame.clear();
-    jkl.search_sqlite("server.db","SELECT \"token\" FROM \"admin\" WHERE \"account\"='server.key';");
-    dataframe ol(0,1);
-    ol.insert("server.key");
-    ol.search_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<std::string>{"account"},std::vector<std::string>{"token"});
-    str=ol.frame.back();
-    
-    auto xcc=adsd->decrypt3(str,"x7bhm3Ma");
-    */
-   /*
- 
-    auto xc=std::vector<unsigned char>(str.begin(), str.end());
-    xck=xc;
-    //std::vector<unsigned char> xc{'a','d','d','d','f'};
-    auto xc1=adsd->encrypt2(xc,"x7bhm3Ma");
-    
-    str=std::string(xc1.begin(),xc1.end());
-    jkl.frame.back()=str;
-    jkl.write_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<int>{1});
-    jkl.frame.clear();
-    jkl.search_sqlite("server.db","SELECT \"token\" FROM \"admin\" WHERE \"account\"='server.key';");
-    dataframe ol(0,1);
-    ol.insert("server.key");
-    ol.search_sqlite("server.db","admin",std::vector<std::string>{"TEXT","BLOB"},std::vector<std::string>{"account"},std::vector<std::string>{"token"});
-    str=ol.frame.back();
-    //str=jkl.frame.back();
-    std::cout<<xc1.size()<<std::endl;
-    xc1=std::vector<unsigned char>(str.begin(), str.end());
-    std::cout<<xc1.size()<<std::endl;
-    auto xcc=adsd->decrypt2(xc1,"x7bhm3Ma");
-
-    if(xck==xcc){std::cout<<"ALL GODD"<<std::endl;}
-    else{std::cout<<"FAAAKKKK"<<std::endl;}
-    std::cin>>k;
-    */
 entry();
-/*
-    std::string line="gemliste_nam.csv";
-    dataframe test;
-    test.open_csv(line);
-    test.check();
-    int l;
-    std::cout<<test.rows<<std::endl;
-    for(int i=1;i<=test.rows;i++){
-    dataframe out(0,1);
 
-    //out.insert(test(i,1));
-   
-    
-   
-    out.regex_expand("[0-9][0-9][0-9][0-9][0-9]",1);
-   //  out.print();
-
-    dataframe out2(0,1);
-    out2.insert(test(i,1));
-
-    out2.regex_expand("([A-Za-zÖöÄäÜüß ]+)",1);
-     
-    //out.print();
-    //out2.print();
-    
-    }
-    */
-    //   OpenSSL_add_all_algorithms();
-    // Check command line arguments.
-    /*
-    if (argc != 5)
-    {
-        std::cerr <<
-            "Usage: http-server-async <address> <port> <doc_root> <threads>\n" <<
-            "Example:\n" <<
-            "    http-server-async 0.0.0.0 8080 . 1\n";
-        return EXIT_FAILURE;
-    }
-    */
-
-    //Bx.search_sqlite(DB,stmt,"SELECT * from tickets;");
-     //std::function<std::string(std::vector<std::string>)> func=callback;
-
- //OpenSSL_add_all_algorithms();
-
-    //std::shared_ptr<keymanager> hs;
     std::function<std::string(http::request<http::string_body>&,http::response<http::string_body>&,std::string&, void*)> func=callback;
     server_configuration funcs(func,"8080");
     
